@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block title %}Home - Innovative HealthCare{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+
+  <div class="container mx-auto px-6 py-16">
+    <div class="flex flex-col lg:flex-row items-center justify-between max-w-7xl mx-auto">
+
+      <div class="lg:w-1/2 text-center lg:text-left mb-12 lg:mb-0">
+        <h1 class="text-4xl lg:text-5xl font-light text-gray-800 leading-tight mb-6">
+          Welcome to
+          <span class="text-blue-600 font-bold block text-5xl lg:text-6xl mt-2">
+            Innovative HealthCare
+          </span>
+        </h1>
+        <p class="text-lg text-gray-600 leading-relaxed max-w-2xl">
+          Access a next-generation healthcare system designed for convenience — from online doctor appointments
+          and medical accessories to emergency assistance and hospital blood management.
+        </p>
+        <div class="mt-8">
+          <button class="get-started-btn bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+            Get Started
+          </button>
+        </div>
+      </div>
+
+      <!-- Image -->
+      <div class="lg:w-1/2 flex justify-center">
+        <div class="relative">
+          <div class="absolute inset-0 bg-blue-200 rounded-full blur-3xl opacity-30 scale-110"></div>
+          <img src="{% static '/media/homeProfail.png' %}" alt="Healthcare Image"
+               class="relative rounded-2xl shadow-2xl max-w-md w-full h-auto object-cover">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Services Section -->
+  <div class="bg-white py-20">
+    <div class="container mx-auto px-6">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl lg:text-5xl font-light text-gray-800 mb-4">
+          We <span class="text-blue-600 font-semibold">Offer</span>
+        </h2>
+        <div class="w-24 h-1 bg-blue-600 mx-auto"></div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+        
+        <!-- Card 1: Online Doctor Appointments -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 text-center hover:scale-105 transform transition duration-300 border-t-4 border-blue-600">
+          <div class="text-5xl mb-6">👨‍⚕️</div>
+          <h3 class="text-xl font-semibold mb-4 text-gray-800">Online Doctor Appointments</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Book appointments with experienced doctors anytime, anywhere, without waiting in queues.
+          </p>
+          <button class="mt-6 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
+            Book Now
+          </button>
+        </div>
+
+        <!-- Card 2: Hospital Blood Management -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 text-center hover:scale-105 transform transition duration-300 border-t-4 border-red-600">
+          <div class="text-5xl mb-6">🩸</div>
+          <h3 class="text-xl font-semibold mb-4 text-gray-800">Hospital Blood Management</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Access real-time blood availability in hospitals and request emergency assistance when needed.
+          </p>
+          <button class="mt-6 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition text-sm font-semibold">
+            Find Blood
+          </button>
+        </div>
+
+        <!-- Card 3: Diet Compatibility -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 text-center hover:scale-105 transform transition duration-300 border-t-4 border-green-600">
+          <div class="text-5xl mb-6">🥗</div>
+          <h3 class="text-xl font-semibold mb-4 text-gray-800">Diet Compatibility</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Check food compatibility with your medical conditions and get personalized diet recommendations.
+          </p>
+          <button class="mt-6 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-semibold">
+            Check Diet
+          </button>
+        </div>
+
+        <!-- Card 4: Medicine Reminder -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 text-center hover:scale-105 transform transition duration-300 border-t-4 border-purple-600">
+          <div class="text-5xl mb-6">💊</div>
+          <h3 class="text-xl font-semibold mb-4 text-gray-800">Medicine Reminder</h3>
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Never miss your medication with smart reminders and tracking of your daily medicine schedule.
+          </p>
+          <button class="mt-6 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm font-semibold">
+            Set Reminder
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

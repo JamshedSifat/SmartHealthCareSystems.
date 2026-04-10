@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{% static 'image/favicon.png' %}" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{% block title %}Home - Innovative HealthCare{% endblock %}</title>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-blue-600 shadow-lg">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="text-white font-bold text-xl">
+                    <a href="{% url 'home' %}">Innovative HealthCare</a>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="{% url 'home' %}" class="text-white hover:text-blue-200">Home</a>
+                    <a href="#" class="text-white hover:text-blue-200">About</a>
+                    <a href="#" class="text-white hover:text-blue-200">Contact</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="min-h-screen">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2025 Innovative HealthCare. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
