@@ -1,1 +1,111 @@
-file is here
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Appointment{% endblock %}
+
+{% block extra-styles %}
+    <link rel="stylesheet" href="{% static 'css/__appointment.css' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+{% endblock %}
+
+{% block content %}
+<div class="main-container max-w-6xl mx-auto p-4 text-black">
+    <!-- Search bar -->
+    <div class="search-container mb-8 flex justify-center">
+        <form id="search-form" action="{% url 'appointments:doctor_search' %}" method="get"
+              class="flex items-center gap-2 w-full max-w-md">
+            <input type="text" id="search-input" name="q" placeholder="Search doctors..."
+                   class="border border-gray-300 rounded-lg px-4 py-3 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <button type="submit" id="search-button"
+                    class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-200 font-medium">
+                Search
+            </button>
+        </form>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-2">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Doctor cards -->
+    <div class="doctor-profile-container grid grid-cols-1 lg:grid-cols-2 gap-6 justify-items-center">
+        {% if doctors %}
+            {% for doctor in doctors %}
+                <div class="doctor-card bg-blue-300 shadow-lg rounded-xl p-6 w-full max-w-md border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+                    <!-- Doctor image -->
+                    <div class="flex justify-center mb-4">
+                        {% if doctor.image %}
+                            <img src="{{ doctor.image.url }}" alt="{{ doctor.name }}"
+                                 class="w-24 h-24 object-cover rounded-full border-4 border-blue-100">
+                        {% else %}
+                            <div class="w-24 h-24 rounded-full border-4 border-blue-100 bg-gray-300 flex items-center justify-center text-2xl">
+                                👨‍⚕️
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Doctor info -->
+                    <div class="doctor-info text-center mb-4">
+                        <h1 class="doctor-name text-xl font-bold text-gray-800 mb-1">{{ doctor.name }}</h1>
+                        <p class="doctor-specialty text-blue-600 font-medium mb-2">{{ doctor.specialty }}</p>
+                        <p class="doctor-cost text-green-600 font-semibold mb-2">Payment: ৳{{ doctor.cost }}</p>
+                        <p class="text-sm text-gray-600">
+                            <strong>Available spots: {{ doctor.available_spots }}</strong>
+                        </p>
+                    </div>
+
+                    <!-- Appointment slots -->
+                    <div class="appointment-slots mb-4">
+                        <h2 class="font-semibold text-gray-800 mb-3 text-center">Appointment Slots</h2>
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            {% if doctor.doctortimeslot_set.all %}
+                                <ul class="text-sm text-gray-700 space-y-1">
+                                    {% for slot in doctor.doctortimeslot_set.all %}
+                                        <li class="text-center">
+                                            <span class="font-medium">{{ slot.start_time }}</span> -
+                                            <span class="font-medium">{{ slot.end_time }}</span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="text-sm text-gray-500 text-center">No slots available</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div class="action-buttons flex justify-center">
+                        {% if doctor.available_spots > 0 and doctor.status %}
+                            <a href="{% url 'appointments:create_appointment' doctor.id %}"
+                               class="create-appointment-button bg-blue-500 hover:bg-blue-600 text-white font-medium px-6 py-3 rounded-lg transition duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                                Create Appointment
+                            </a>
+                        {% else %}
+                            <span class="unavailable bg-gray-200 text-gray-500 px-6 py-3 rounded-lg font-medium">
+                                Unavailable
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-span-full flex justify-center items-center py-12">
+                <div class="text-center">
+                    <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <p class="text-gray-500 text-lg font-medium">No doctors found</p>
+                    <p class="text-gray-400 text-sm mt-1">Try adjusting your search criteria</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
