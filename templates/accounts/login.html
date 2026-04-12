@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Login - Innovative HealthCare{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 flex items-center justify-center">
+    <div class="max-w-md w-full">
+        <!-- Card -->
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-8 text-center">
+                <h1 class="text-3xl font-bold text-white mb-2">Welcome Back</h1>
+                <p class="text-blue-100">Login to your account</p>
+            </div>
+
+            <!-- Form -->
+            <form method="post" action="{% url 'accounts:login' %}" class="px-6 py-8 space-y-6">
+                {% csrf_token %}
+
+                <!-- Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="p-4 rounded-lg bg-red-100 border border-red-400 text-red-700">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Username -->
+                <div>
+                    <label for="u_name" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Username
+                    </label>
+                    <input 
+                        type="text" 
+                        name="u_name" 
+                        id="u_name"
+                        required 
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                        placeholder="Enter your username"
+                    >
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label for="u_password" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Password
+                    </label>
+                    <input 
+                        type="password" 
+                        name="u_password" 
+                        id="u_password"
+                        required 
+                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                        placeholder="Enter your password"
+                    >
+                </div>
+
+                <!-- Submit Button -->
+                <button 
+                    type="submit" 
+                    class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition duration-300 transform hover:scale-105 shadow-lg"
+                >
+                    Login
+                </button>
+
+                <!-- Register Link -->
+                <div class="text-center pt-4 border-t border-gray-200">
+                    <p class="text-gray-600 text-sm">
+                        Don't have an account? 
+                        <a href="{% url 'accounts:register' %}" class="text-blue-600 font-semibold hover:text-blue-700 hover:underline transition">
+                            Sign up here
+                        </a>
+                    </p>
+                </div>
+            </form>
+        </div>
+
+      
+    </div>
+</div>
+{% endblock %}
