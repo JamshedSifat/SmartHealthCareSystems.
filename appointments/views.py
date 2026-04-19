@@ -91,6 +91,33 @@ def cancel_appointment(request, appointment_id, doctor_id):
         doctor.available_spots += 1
         doctor.save()
         appointment.delete()
+
+def emergency(request):
+    hospitals = Hospital.objects.all()
+    return render(request, "appointments/emergency.html", {'hospitals': hospitals})
+
+def blood_search(request):
+    query = request.GET.get('q')
+    hospitals = Hospital.objects.all()
+
+    if query:
+        hospitals = hospitals.filter(
+            hospital_name__icontains=query
+        ) | hospitals.filter(
+            location__icontains=query
+        ) | hospitals.filter(
+            blood_samples__blood_group__iexact=query
+        )
+        hospitals = hospitals.distinct()
+    else:
+        messages.error(request, "Search bar was empty")
+        return redirect('appointments:emergency')
+
+    if not hospitals:
+        messages.error(request, "No hospitals found.")
+        return redirect('appointments:emergency')
+
+    return render(request, 'appointments/emergency.html', {'hospitals': hospitals})
         messages.success(request, "Appointment canceled successfully.")
     else:
         messages.error(request, "You are not authorized to cancel this appointment.")
