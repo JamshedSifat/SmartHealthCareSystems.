@@ -1,0 +1,59 @@
+# medicine_reminders/google_calendar_service.py
+
+from urllib.parse import urlencode
+from datetime import datetime, timedelta
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def generate_google_calendar_url(medicine, reminder_time):
+    """
+    ✅ Generate Google Calendar URL - NO API, NO AUTHENTICATION NEEDED
+    প্রতিদিনের recurring event URL তৈরি করুন
+    """
+    try:
+        # Start date এ event তৈরি করুন
+        start_datetime = datetime.combine(medicine.start_date, reminder_time.time)
+        end_datetime = start_datetime + timedelta(minutes=30)
+        
+        start_time = start_datetime.strftime('%Y%m%dT%H%M%S')
+        end_time = end_datetime.strftime('%Y%m%dT%H%M%S')
+        
+        # End date পর্যন্ত DAILY recurrence
+        until_date = medicine.end_date.strftime('%Y%m%d')
+        
+        title = f"💊 {medicine.name} - {medicine.dosage_amount} {medicine.get_dosage_unit_display()}"
+        
+        description = f"""Dosage: {medicine.dosage_amount} {medicine.get_dosage_unit_display()}
+Time: {reminder_time.time.strftime('%I:%M %p')}
+Frequency: {medicine.get_frequency_display()}"""
+        
+        if medicine.food_timing and medicine.food_timing != 'any':
+            description += f"\nFood Timing: {medicine.get_food_timing_display()}"
+        
+        if medicine.instructions:
+            description += f"\n\nInstructions: {medicine.instructions}"
+        
+        if medicine.doctor_name:
+            description += f"\nPrescribed by: {medicine.doctor_name}"
+        
+        # ✅ DAILY RECURRING rule
+        recurrence = f"FREQ=DAILY;UNTIL={until_date}"
+        
+        params = {
+            'action': 'TEMPLATE',
+            'text': title,
+            'dates': f'{start_time}/{end_time}',
+            'details': description,
+            'location': 'Medicine Reminder',
+            'recurrence': recurrence,
+        }
+        
+        google_calendar_url = 'https://calendar.google.com/calendar/render?' + urlencode(params)
+        logger.info(f"Calendar URL generated for {medicine.name}")
+        return google_calendar_url
+        
+    except Exception as e:
+        logger.error(f"Error generating calendar URL: {str(e)}")
+        raise
