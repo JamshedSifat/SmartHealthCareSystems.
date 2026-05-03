@@ -9,18 +9,17 @@ logger = logging.getLogger(__name__)
 
 def generate_google_calendar_url(medicine, reminder_time):
     """
-    ✅ Generate Google Calendar URL - NO API, NO AUTHENTICATION NEEDED
-    প্রতিদিনের recurring event URL তৈরি করুন
+    Generate Google Calendar URL - NO API, NO AUTHENTICATION NEEDED
     """
     try:
-        # Start date এ event তৈরি করুন
+        # Start date এ event 
         start_datetime = datetime.combine(medicine.start_date, reminder_time.time)
         end_datetime = start_datetime + timedelta(minutes=30)
         
         start_time = start_datetime.strftime('%Y%m%dT%H%M%S')
         end_time = end_datetime.strftime('%Y%m%dT%H%M%S')
         
-        # End date পর্যন্ত DAILY recurrence
+        # End date 
         until_date = medicine.end_date.strftime('%Y%m%d')
         
         title = f"💊 {medicine.name} - {medicine.dosage_amount} {medicine.get_dosage_unit_display()}"
@@ -38,7 +37,7 @@ Frequency: {medicine.get_frequency_display()}"""
         if medicine.doctor_name:
             description += f"\nPrescribed by: {medicine.doctor_name}"
         
-        # ✅ DAILY RECURRING rule
+        #  DAILY RECURRING rule
         recurrence = f"FREQ=DAILY;UNTIL={until_date}"
         
         params = {
