@@ -1,4 +1,4 @@
-# medicine_reminders/google_calendar_service.py
+
 
 from urllib.parse import urlencode
 from datetime import datetime, timedelta
