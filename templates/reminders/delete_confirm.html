@@ -1,0 +1,60 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Reminder{% endblock %}
+
+{% block extra-styles %}
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    .glass-effect {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+    }
+    
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .animate-bounce {
+        animation: bounce 1s infinite;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-100 via-white to-indigo-100 py-10 px-2 flex items-center justify-center">
+    <div class="glass-effect shadow-2xl rounded-2xl p-8 border border-gray-200 w-full max-w-md mx-auto">
+        <h2 class="text-center text-2xl font-bold text-red-600 flex items-center justify-center gap-2 mb-8">
+            <span class="text-3xl animate-bounce">🗑️</span> Delete Reminder
+        </h2>
+
+        <div class="text-center mb-6">
+            <p class="text-gray-700">Are you sure you want to delete the reminder for:</p>
+            <h3 class="text-lg font-semibold text-gray-900 mt-2 mb-1">{{ medicine.name }}</h3>
+            <p class="text-gray-500 mb-2">{{ medicine.dosage_amount }} {{ medicine.get_dosage_unit_display }}</p>
+            
+            {% if medicine.doctor_name %}
+            <p class="text-gray-600 text-sm">
+                👨‍⚕️ Prescribed by: {{ medicine.doctor_name }}
+            </p>
+            {% endif %}
+            
+            <p class="text-red-400 text-sm font-medium mt-2">⚠️ This action cannot be undone.</p>
+        </div>
+
+        <div class="flex items-center justify-center gap-3 mt-6">
+            <a href="{% url 'reminders:dashboard' %}" class="px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100 transition shadow-sm font-semibold">
+                Cancel
+            </a>
+            <form method="post" class="inline-block">
+                {% csrf_token %}
+                <button type="submit" class="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold shadow transition flex items-center gap-2">
+                    🗑️ Delete Reminder
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
