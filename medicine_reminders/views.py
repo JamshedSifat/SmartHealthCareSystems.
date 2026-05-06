@@ -8,7 +8,43 @@ from .google_calendar_service import generate_google_calendar_url
 import logging
 
 logger = logging.getLogger(__name__)
+@login_required
+def reminders_home(request):
+    """Show medicine reminders for today"""
+    today = date.today()
+    medicines = Medicine.objects.filter(user=request.user, is_active=True)
 
+    schedule = []
+    for medicine in medicines:
+        if medicine.start_date <= today <= medicine.end_date:
+            for reminder_time in medicine.reminder_times.all():
+                taken = DoseTaken.objects.filter(
+                    medicine=medicine,
+                    reminder_time=reminder_time,
+                    date_taken=today
+                ).exists()
+
+                calendar_url = generate_google_calendar_url(medicine, reminder_time)
+
+                schedule.append({
+                    'medicine': medicine,
+                    'reminder_time': reminder_time,
+                    'taken': taken,
+                    'due': False,
+                    'calendar_url': calendar_url,
+                })
+
+    schedule.sort(key=lambda x: x['reminder_time'].time)
+
+    context = {
+        'today_schedule': schedule,
+        'active_reminders': medicines,
+        'today': today,
+        'total_medicines_count': Medicine.objects.count(),
+        'user_medicines_count': medicines.count(),
+    }
+
+    return render(request, 'reminders/dashboard.html', context)
 
 @login_required
 def add_reminder(request):
@@ -179,3 +215,85 @@ def add_to_calendar(request, medicine_id, reminder_time_id):
         logger.error(f"Error: {str(e)}")
         messages.error(request, f"❌ Error: {str(e)}")
         return redirect('reminders:dashboard')
+        @login_required
+def mark_taken(request, medicine_id, reminder_time_id):
+    """Mark a dose as taken"""
+    medicine = get_object_or_404(Medicine, id=medicine_id, user=request.user)
+    reminder_time = get_object_or_404(ReminderTime, id=reminder_time_id, medicine=medicine)
+    
+    if request.method == 'POST':
+        today = date.today()
+        now = timezone.now()
+        
+        dose, created = DoseTaken.objects.get_or_create(
+            medicine=medicine,
+            reminder_time=reminder_time,
+            date_taken=today,
+            defaults={'time_taken': now.time()}
+        )
+        
+        if created:
+            messages.success(request, f"✅ {medicine.name} marked as taken!")
+        else:
+            messages.info(request, f"ℹ️ {medicine.name} already marked as taken today.")
+    
+    return redirect('reminders:dashboard')
+
+
+
+
+
+@login_required
+def reminder_history(request):
+    """Show dose history for user"""
+    taken_doses = DoseTaken.objects.filter(
+        medicine__user=request.user
+    ).select_related('medicine', 'reminder_time').order_by('-date_taken', '-time_taken')[:100]
+    
+    context = {
+        'taken_doses': taken_doses,
+    }
+    return render(request, 'reminders/history.html', context)
+
+
+@login_required
+def reminders_list(request):
+    """Show all reminders grouped by status"""
+    today = date.today()
+    user_medicines = Medicine.objects.filter(user=request.user, is_active=True)
+    
+    upcoming_reminders = []
+    past_reminders = []
+    
+    for medicine in user_medicines:
+        for reminder_time in medicine.reminder_times.all():
+            calendar_url = generate_google_calendar_url(medicine, reminder_time)
+            
+            reminder_data = {
+                'medicine_name': medicine.name,
+                'dosage': f"{medicine.dosage_amount} {medicine.get_dosage_unit_display()}",
+                'reminder_date': medicine.start_date,
+                'reminder_time': reminder_time.time,
+                'notes': medicine.instructions,
+                'doctor_name': medicine.doctor_name,
+                'created_by': medicine.user,
+                'calendar_url': calendar_url,
+            }
+            
+            if medicine.end_date >= today:
+                upcoming_reminders.append(reminder_data)
+            else:
+                past_reminders.append(reminder_data)
+    
+    upcoming_reminders.sort(key=lambda x: (x['reminder_date'], x['reminder_time']))
+    past_reminders.sort(key=lambda x: (x['reminder_date'], x['reminder_time']), reverse=True)
+    
+    context = {
+        'upcoming_reminders': upcoming_reminders,
+        'past_reminders': past_reminders,
+        'total_reminders': len(upcoming_reminders) + len(past_reminders),
+        'upcoming_count': len(upcoming_reminders),
+        'past_count': len(past_reminders),
+    }
+    
+    return render(request, 'reminders/reminders_list.html', context)
