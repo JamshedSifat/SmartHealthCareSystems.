@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Edit {{ medicine.name }} Reminder{% endblock %}
+{% block extra-styles %}
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    .glass-effect {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-blue-100 via-white to-indigo-100 py-12 px-4">
+    <div class="max-w-2xl mx-auto">
+        
+        <!-- Header -->
+        <div class="glass-effect text-white rounded-lg p-8 mb-8 bg-gradient-to-r from-blue-600 to-indigo-600">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold mb-2">Edit Reminder</h1>
+                    <p class="text-blue-100">Medicine: <span class="font-semibold">{{ medicine.name }}</span></p>
+                </div>
+                <a href="{% url 'reminders:dashboard' %}"
+                   class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-2 rounded-lg transition">
+                    ← Back
+                </a>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <div class="glass-effect rounded-lg shadow-md p-8">
+            <form method="post" class="space-y-6 text-black">
+                {% csrf_token %}
+
+                <!-- Medicine Name -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">
+                        Medicine Name <span class="text-red-600">*</span>
+                    </label>
+                    <input type="text"
+                           name="name"
+                           value="{{ medicine.name }}"
+                           required
+                           class="form-input">
+                </div>
+
+                <!-- Doctor Name -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">
+                        Prescribed by Doctor (Optional)
+                    </label>
+                    <input type="text"
+                           name="doctor_name"
+                           value="{{ medicine.doctor_name }}"
+                           placeholder="e.g., Dr. John Doe"
+                           class="form-input">
+                </div>
+
+                <!-- Prescription Date -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">
+                        Prescription Date (Optional)
+                    </label>
+                    <input type="date"
+                           name="prescription_date"
+                           value="{% if medicine.prescription_date %}{{ medicine.prescription_date }}{% endif %}"
+                           class="form-input">
+                </div>
+
+                <!-- Frequency -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">
+                        Frequency <span class="text-red-600">*</span>
+                    </label>
+                    <select name="frequency"
+                            required
+                            class="form-input">
+                        <option value="once" {% if medicine.frequency == 'once' %}selected{% endif %}>Once Daily</option>
+                        <option value="twice" {% if medicine.frequency == 'twice' %}selected{% endif %}>Twice Daily</option>
+                        <option value="thrice" {% if medicine.frequency == 'thrice' %}selected{% endif %}>Three Times Daily</option>
+                        <option value="four" {% if medicine.frequency == 'four' %}selected{% endif %}>Four Times Daily</option>
+                    </select>
+                </div>
+
+                <!-- Dosage Amount & Unit -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">
+                            Dosage Amount <span class="text-red-600">*</span>
+                        </label>
+                        <input type="number"
+                               name="dosage_amount"
+                               step="0.5"
+                               value="{{ medicine.dosage_amount }}"
+                               required
+                               class="form-input">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">
+                            Unit <span class="text-red-600">*</span>
+                        </label>
+                        <select name="dosage_unit"
+                                required
+                                class="form-input">
+                            <option value="tablet" {% if medicine.dosage_unit == 'tablet' %}selected{% endif %}>Tablet(s)</option>
+                            <option value="capsule" {% if medicine.dosage_unit == 'capsule' %}selected{% endif %}>Capsule(s)</option>
+                            <option value="ml" {% if medicine.dosage_unit == 'ml' %}selected{% endif %}>ML</option>
+                            <option value="mg" {% if medicine.dosage_unit == 'mg' %}selected{% endif %}>MG</option>
+                            <option value="drops" {% if medicine.dosage_unit == 'drops' %}selected{% endif %}>Drop(s)</option>
+                            <option value="teaspoon" {% if medicine.dosage_unit == 'teaspoon' %}selected{% endif %}>Teaspoon(s)</option>
+                            <option value="tablespoon" {% if medicine.dosage_unit == 'tablespoon' %}selected{% endif %}>Tablespoon(s)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Food Timing -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">
+                        Before / After Food
+                    </label>
+                    <select name="food_timing"
+                            class="form-input">
+                        <option value="any" {% if medicine.food_timing == 'any' %}selected{% endif %}>No Preference</option>
+                        <option value="before" {% if medicine.food_timing == 'before' %}selected{% endif %}>Before Food</option>
+                        <option value="after" {% if medicine.food_timing == 'after' %}selected{% endif %}>After Food</option>
+                        <option value="with" {% if medicine.food_timing == 'with' %}selected{% endif %}>With Food</option>
+                    </select>
+                </div>
+
+                <!-- Start Date & End Date -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">
+                            Start Date <span class="text-red-600">*</span>
+                        </label>
+                        <input type="date"
+                               name="start_date"
+                               value="{{ start_date }}"
+                               required
+                               class="form-input">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">
+                            End Date <span class="text-red-600">*</span>
+                        </label>
+                        <input type="date"
+                               name="end_date"
+                               value="{{ end_date }}"
+                               required
+                               class="form-input">
+                    </div>
+                </div>
+
+                <!-- Instructions -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">
+                        Special Instructions (Optional)
+                    </label>
+                    <textarea name="instructions"
+                              rows="4"
+                              placeholder="e.g., Take with water, avoid dairy..."
+                              class="form-input resize-none">{{ medicine.instructions }}</textarea>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex gap-4 pt-4">
+                    <a href="{% url 'reminders:dashboard' %}"
+                       class="flex-1 text-center px-6 py-3 border-2 border-blue-300 text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition">
+                        Cancel
+                    </a>
+                    <button type="submit"
+                            class="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition">
+                        Update Reminder
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
