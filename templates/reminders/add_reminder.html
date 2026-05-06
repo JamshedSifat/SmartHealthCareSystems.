@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Add Medicine Reminder{% endblock %}
+
+{% block extra-styles %}
+<script src="https://cdn.tailwindcss.com"></script>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-blue-50 py-12 px-4">
+    <div class="max-w-2xl mx-auto">
+        
+        <!-- Header -->
+        <div class="bg-blue-600 text-white rounded-lg p-8 mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold mb-2">Add Medicine Reminder</h1>
+                    <p class="text-blue-100">Keep track of your medications</p>
+                </div>
+                <a href="{% url 'reminders:dashboard' %}"
+                   class="bg-blue-700 hover:bg-blue-800 text-white px-6 py-2 rounded-lg transition">
+                    Back
+                </a>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <div class="bg-white rounded-lg shadow-md p-8">
+            <form method="post" class="space-y-6 text-black">
+                {% csrf_token %}
+
+                <!-- Medicine Name -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">
+                        Medicine Name *
+                    </label>
+                    <input type="text"
+                           name="name"
+                           required
+                           placeholder="e.g., Paracetamol"
+                           class="w-full px-4 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+
+                <!-- Frequency -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">
+                        Frequency *
+                    </label>
+                    <select name="frequency"
+                            required
+                            class="w-full px-4 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="once">Once Daily</option>
+                        <option value="twice">Twice Daily</option>
+                        <option value="thrice">Three Times Daily</option>
+                        <option value="four">Four Times Daily</option>
+                    </select>
+                </div>
+
+                <!-- Dosage Amount & Unit -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">
+                            Dosage Amount *
+                        </label>
+                        <input type="number"
+                               name="dosage_amount"
+                               step="0.5"
+                               value="1"
+                               required
+                               class="w-full px-4 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">
+                            Unit *
+                        </label>
+                        <select name="dosage_unit"
+                                required
+                                class="w-full px-4 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="tablet">Tablet(s)</option>
+                            <option value="capsule">Capsule(s)</option>
+                            <option value="ml">ML</option>
+                            <option value="mg">MG</option>
+                            <option value="drops">Drop(s)</option>
+                            <option value="teaspoon">Teaspoon(s)</option>
+                            <option value="tablespoon">Tablespoon(s)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Start Date & End Date -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">
+                            Start Date *
+                        </label>
+                        <input type="date"
+                               name="start_date"
+                               id="start_date"
+                               required
+                               class="w-full px-4 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">
+                            End Date *
+                        </label>
+                        <input type="date"
+                               name="end_date"
+                               id="end_date"
+                               required
+                               class="w-full px-4 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+
+                <!-- Reminder Times -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">
+                        Reminder Times *
+                    </label>
+                    
+                    <div id="time-container" class="space-y-2">
+                        <div class="flex gap-2">
+                            <input type="time"
+                                   name="times[]"
+                                   required
+                                   class="flex-1 px-4 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <button type="button"
+                                    onclick="addTimeField()"
+                                    class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition font-semibold">
+                                + Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Food Timing -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">
+                        Before / After Food
+                    </label>
+                    <select name="food_timing"
+                            class="w-full px-4 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="any">No Preference</option>
+                        <option value="before">Before Food</option>
+                        <option value="after">After Food</option>
+                        <option value="with">With Food</option>
+                    </select>
+                </div>
+
+                <!-- Instructions -->
+                <div>
+                    <label class="block text-sm font-semibold text-gray-800 mb-2">
+                        Special Instructions (Optional)
+                    </label>
+                    <textarea name="instructions"
+                              rows="3"
+                              placeholder="e.g., Take with water, avoid dairy..."
+                              class="w-full px-4 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex gap-4 pt-4">
+                    <a href="{% url 'reminders:dashboard' %}"
+                       class="flex-1 text-center px-6 py-3 border-2 border-blue-300 text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition">
+                        Cancel
+                    </a>
+                    <button type="submit"
+                            class="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition">
+                        Save Reminder
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    const startInput = document.getElementById('start_date');
+    const endInput = document.getElementById('end_date');
+    
+    startInput.min = today;
+    endInput.min = today;
+    startInput.value = today;
+    
+    startInput.addEventListener('change', function() {
+        endInput.min = this.value;
+    });
+});
+
+function addTimeField() {
+    const container = document.getElementById('time-container');
+    const div = document.createElement('div');
+    div.className = 'flex gap-2';
+    div.innerHTML = `
+        <input type="time"
+               name="times[]"
+               required
+               class="flex-1 px-4 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        <button type="button"
+                onclick="this.parentElement.remove()"
+                class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition font-semibold">
+            Remove
+        </button>
+    `;
+    container.appendChild(div);
+}
+</script>
+
+{% endblock %}
