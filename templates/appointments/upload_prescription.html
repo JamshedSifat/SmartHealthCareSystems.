@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Upload Prescription{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto p-4 text-black">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-8 text-white">
+            <h1 class="text-3xl font-bold">
+                <i class="fas fa-prescription-bottle-alt mr-2"></i>Prescription
+            </h1>
+            <p class="text-blue-100 mt-2">Create prescription for patient</p>
+        </div>
+
+        <!-- Patient Info -->
+        <div class="p-6 bg-gray-50 border-b">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-sm text-gray-600">Patient</p>
+                    <p class="font-bold text-lg">{{ appointment.user.get_full_name|default:appointment.user.username }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Appointment Date</p>
+                    <p class="font-bold text-lg">{{ appointment.appointment_date|date:"M d, Y" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form method="post" class="p-8 space-y-6">
+            {% csrf_token %}
+
+            <!-- Diagnosis -->
+            <div>
+                <label for="{{ form.diagnosis.id_for_label }}" class="block text-lg font-bold text-gray-800 mb-3">
+                    <i class="fas fa-stethoscope mr-2"></i>Diagnosis *
+                </label>
+                {{ form.diagnosis }}
+                {% if form.diagnosis.errors %}
+                    <div class="text-red-600 text-sm mt-1">{{ form.diagnosis.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Medicines Selection -->
+            <div>
+                <label class="block text-lg font-bold text-gray-800 mb-3">
+                    <i class="fas fa-pills mr-2"></i>Select Medicines *
+                </label>
+                
+                {% if form.medicines %}
+                    <div class="space-y-2 bg-gray-50 p-4 rounded-lg border-2 border-gray-200">
+                        {% for medicine in form.medicines %}
+                            <label class="flex items-center gap-3 p-3 hover:bg-white rounded cursor-pointer transition">
+                                {{ medicine.tag }}
+                                <span class="flex-1">
+                                    <span class="font-semibold text-gray-800">
+                                        {{ medicine.choice_label }}
+                                    </span>
+                                </span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                    {% if form.medicines.errors %}
+                        <div class="text-red-600 text-sm mt-1">{{ form.medicines.errors }}</div>
+                    {% endif %}
+                {% else %}
+                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+                        <p class="text-yellow-700">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            No medicines available. 
+                            <a href="{% url 'appointments:add_medicine' %}" class="font-bold underline">Add medicines first</a>
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Notes -->
+            <div>
+                <label for="{{ form.notes.id_for_label }}" class="block text-lg font-bold text-gray-800 mb-3">
+                    <i class="fas fa-pen-alt mr-2"></i>Additional Notes (Optional)
+                </label>
+                {{ form.notes }}
+                {% if form.notes.errors %}
+                    <div class="text-red-600 text-sm mt-1">{{ form.notes.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-3 pt-4">
+                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold transition shadow-md">
+                    <i class="fas fa-save mr-2"></i>
+                    {% if prescription %}Update{% else %}Create{% endif %} Prescription
+                </button>
+                <a href="{% url 'appointments:doctor_appointments' %}" 
+                   class="flex-1 text-center bg-gray-300 hover:bg-gray-400 text-gray-800 py-3 rounded-lg font-bold transition">
+                    <i class="fas fa-times mr-2"></i>Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    textarea {
+        @apply w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent;
+    }
+    
+    input[type="checkbox"] {
+        @apply w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500;
+    }
+</style>
+{% endblock %}
