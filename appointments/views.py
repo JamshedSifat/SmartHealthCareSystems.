@@ -156,4 +156,112 @@ def delete_medicine(request, medicine_id):
     messages.success(request, "Medicine deleted successfully.")
     return redirect('appointments:add_medicine')
 
+# ============ Doctor Profile & Reviews Views ============
+
+def doctor_detail(request, doctor_id):
+    """Display doctor profile details"""
+    doctor = get_object_or_404(Doctor, id=doctor_id)
+    reviews = DoctorReview.objects.filter(doctor=doctor)
+    time_slots = DoctorTimeSlot.objects.filter(doctor=doctor)
+    
+    user_review = None
+    if request.user.is_authenticated:
+        user_review = reviews.filter(user=request.user).first()
+
+    return render(request, 'appointments/doctor_detail.html', {
+        'doctor': doctor,
+        'reviews': reviews,
+        'time_slots': time_slots,
+        'user_review': user_review,
+        'total_reviews': reviews.count(),
+        'average_rating': doctor.average_rating,
+    })
+
+
+@login_required
+def create_review(request, doctor_id):
+    """Create or update a review"""
+    doctor = get_object_or_404(Doctor, id=doctor_id)
+    
+    existing_review = DoctorReview.objects.filter(doctor=doctor, user=request.user).first()
+    
+    if request.method == 'POST':
+        rating = request.POST.get('rating', 5)
+        comment = request.POST.get('comment', '')
+        
+        if existing_review:
+            existing_review.rating = int(rating)
+            existing_review.comment = comment
+            existing_review.save()
+            messages.success(request, "Review updated successfully.")
+        else:
+            DoctorReview.objects.create(
+                doctor=doctor,
+                user=request.user,
+                rating=int(rating),
+                comment=comment
+            )
+            doctor.total_reviews += 1
+            doctor.average_rating = doctor.get_avg_rating()
+            doctor.save()
+            messages.success(request, "Your review has been saved.")
+        
+        return redirect('appointments:doctor_detail', doctor_id=doctor_id)
+    
+    return render(request, 'appointments/create_review.html', {
+        'doctor': doctor,
+        'existing_review': existing_review
+    })
+
+
+@login_required
+def edit_review(request, doctor_id):
+    """Edit an existing review"""
+    doctor = get_object_or_404(Doctor, id=doctor_id)
+    review = get_object_or_404(DoctorReview, doctor=doctor, user=request.user)
+    
+    if request.method == 'POST':
+        review.rating = int(request.POST.get('rating', review.rating))
+        review.comment = request.POST.get('comment', review.comment)
+        review.save()
+        
+        doctor.average_rating = doctor.get_avg_rating()
+        doctor.save()
+        
+        messages.success(request, "Review updated successfully.")
+        return redirect('appointments:doctor_detail', doctor_id=doctor_id)
+    
+    return render(request, 'appointments/create_review.html', {
+        'doctor': doctor,
+        'existing_review': review,
+        'is_edit': True
+    })
+
+
+@login_required
+def delete_review(request, review_id):
+    """Delete a review"""
+    review = get_object_or_404(DoctorReview, id=review_id, user=request.user)
+    doctor = review.doctor
+    doctor_id = doctor.id
+    
+    doctor.total_reviews -= 1
+    review.delete()
+    doctor.average_rating = doctor.get_avg_rating()
+    doctor.save()
+    
+    messages.success(request, "Review deleted successfully.")
+    return redirect('appointments:doctor_detail', doctor_id=doctor_id)
+
+
+def top_doctors(request):
+    """Display top rated doctors"""
+    doctors = Doctor.objects.filter(
+        average_rating__gte=4.0
+    ).order_by('-average_rating', '-total_reviews')[:10]
+    
+    return render(request, 'appointments/top_doctors.html', {
+        'doctors': doctors,
+        'total_doctors': doctors.count()
+    })
 
