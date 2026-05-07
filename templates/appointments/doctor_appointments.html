@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Appointments - Doctor{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">
+            <i class="fas fa-calendar-alt text-blue-600"></i> My Appointments
+        </h1>
+        <p class="text-gray-600">Manage patient appointments and upload prescriptions</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-6 shadow-lg">
+            <p class="text-sm opacity-90 mb-1">Total Appointments</p>
+            <p class="text-4xl font-bold">{{ appointments|length }}</p>
+        </div>
+        
+        <div class="bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl p-6 shadow-lg">
+            <p class="text-sm opacity-90 mb-1">Today</p>
+            <p class="text-4xl font-bold">{{ today_appointments|length }}</p>
+        </div>
+        
+        <div class="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-xl p-6 shadow-lg">
+            <p class="text-sm opacity-90 mb-1">Pending Prescriptions</p>
+            <p class="text-4xl font-bold">{{ pending_prescriptions }}</p>
+        </div>
+
+        <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl p-6 shadow-lg">
+            <p class="text-sm opacity-90 mb-1">Completed</p>
+            <p class="text-4xl font-bold">{{ completed_appointments }}</p>
+        </div>
+    </div>
+
+    {% if appointments %}
+        <!-- Appointments Table -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+                        <tr>
+                            <th class="px-6 py-4 text-left font-bold">#</th>
+                            <th class="px-6 py-4 text-left font-bold">Patient</th>
+                            <th class="px-6 py-4 text-left font-bold">Problem</th>
+                            <th class="px-6 py-4 text-left font-bold">Date & Time</th>
+                            <th class="px-6 py-4 text-left font-bold">Status</th>
+                            <th class="px-6 py-4 text-center font-bold">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        {% for appointment in appointments %}
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="px-6 py-4 font-bold text-gray-800">
+                                    #{{ appointment.serial_number }}
+                                </td>
+                                
+                                <td class="px-6 py-4">
+                                    <p class="font-bold text-gray-800">
+                                        {{ appointment.user.get_full_name|default:appointment.user.username }}
+                                    </p>
+                                    <p class="text-xs text-gray-600">{{ appointment.user.email }}</p>
+                                </td>
+                                
+                                <td class="px-6 py-4">
+                                    <p class="text-gray-800 max-w-xs truncate">
+                                        {{ appointment.description }}
+                                    </p>
+                                </td>
+                                
+                                <td class="px-6 py-4 text-sm">
+                                    <p class="font-bold text-gray-800">{{ appointment.appointment_date|date:"d M, Y" }}</p>
+                                    <p class="text-gray-600">
+                                        {{ appointment.doctor_time_slot.start_time|time:"H:i" }} - 
+                                        {{ appointment.doctor_time_slot.end_time|time:"H:i" }}
+                                    </p>
+                                </td>
+                                
+                                <td class="px-6 py-4">
+                                    {% if appointment.status == 'confirmed' %}
+                                        <span class="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
+                                            <i class="fas fa-check-circle mr-1"></i>Confirmed
+                                        </span>
+                                    {% elif appointment.status == 'completed' %}
+                                        <span class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold">
+                                            <i class="fas fa-check-double mr-1"></i>Completed
+                                        </span>
+                                    {% elif appointment.status == 'cancelled' %}
+                                        <span class="inline-block bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold">
+                                            <i class="fas fa-times-circle mr-1"></i>Cancelled
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                
+                                <td class="px-6 py-4 text-center">
+                                    <div class="flex gap-2 justify-center flex-wrap">
+                                        <!-- View Details -->
+                                        <button onclick="viewDetails({{ appointment.id }})" 
+                                                class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm transition"
+                                                title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+
+                                        <!-- Check Prescription Status -->
+                                        {% if appointment.prescription %}
+                                            <!-- Already Has Prescription -->
+                                            <a href="{% url 'appointments:view_prescription' appointment.prescription.id %}" 
+                                               class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm transition"
+                                               title="View Prescription">
+                                                <i class="fas fa-check-circle"></i>
+                                            </a>
+                                            
+                                            <a href="{% url 'appointments:edit_prescription' appointment.prescription.id %}" 
+                                               class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm transition"
+                                               title="Edit Prescription">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        {% else %}
+                                            <!-- No Prescription Yet - Upload Button -->
+                                            <a href="{% url 'appointments:upload_prescription' appointment.id %}" 
+                                               class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition"
+                                               title="Upload Prescription">
+                                                <i class="fas fa-plus-circle"></i>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-16 bg-white rounded-xl shadow-lg">
+            <i class="fas fa-calendar text-6xl text-gray-300 mb-4"></i>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">No Appointments Yet</h2>
+            <p class="text-gray-600">You don't have any appointments scheduled</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    function viewDetails(appointmentId) {
+        alert('Viewing appointment details - ' + appointmentId);
+        // Can add modal here
+    }
+</script>
+{% endblock %}
