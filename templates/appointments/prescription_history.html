@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Prescriptions{% endblock %}
+
+{% block extra-styles %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .prescription-card {
+            transition: all 0.3s ease;
+        }
+        .prescription-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto p-4 text-black">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold inline-block">
+            💊<span class="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent "> My Prescriptions</span>
+        </h1>
+        <p class="text-gray-600 mt-2">View and manage all your medical prescriptions</p>
+    </div>
+
+    {% if prescriptions %}
+        <div class="space-y-5">
+            {% for prescription in prescriptions %}
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden prescription-card border-t-4 border-t-purple-500">
+                    <div class="p-6">
+                        <!-- Header -->
+                        <div class="flex justify-between items-start mb-4 pb-4 border-b border-gray-100">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user-md text-purple-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-xl font-bold text-gray-800">Dr. {{ prescription.doctor.name }}</h2>
+                                    <p class="text-gray-500 text-sm">
+                                        <i class="fas fa-calendar-alt mr-1"></i>
+                                        {{ prescription.appointment.appointment_date|date:"M d, Y" }} at 
+                                        {{ prescription.appointment.doctor_time_slot.start_time|time:"h:i A" }}
+                                    </p>
+                                </div>
+                            </div>
+                            <span class="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
+                                <i class="fas fa-check-circle mr-1"></i> Active
+                            </span>
+                        </div>
+
+                        <!-- Diagnosis -->
+                        <div class="mb-4 pb-4 border-b border-gray-100">
+                            <h3 class="font-bold text-md mb-2 flex items-center gap-2 text-purple-700">
+                                <i class="fas fa-stethoscope"></i> Diagnosis
+                            </h3>
+                            <p class="text-gray-700 bg-yellow-50 p-3 rounded-lg border-l-4 border-yellow-500">{{ prescription.diagnosis }}</p>
+                        </div>
+
+                        <!-- Medicines -->
+                        <div class="mb-4">
+                            <h3 class="font-bold text-md mb-3 flex items-center gap-2 text-purple-700">
+                                <i class="fas fa-pills"></i> Prescribed Medicines 
+                                <span class="bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full">{{ prescription.medicines.all|length }}</span>
+                            </h3>
+                            <div class="space-y-2">
+                                {% for medicine in prescription.medicines.all %}
+                                    <div class="bg-gradient-to-r from-blue-50 to-cyan-50 p-3 rounded-lg border-l-4 border-blue-400 hover:shadow-sm transition">
+                                        <p class="font-semibold text-blue-800">{{ medicine.name }}</p>
+                                        <p class="text-xs text-gray-600 mt-1">
+                                            <span class="inline-block bg-white px-2 py-0.5 rounded mr-2">
+                                                <i class="fas fa-chart-line mr-1"></i>{{ medicine.dosage }}
+                                            </span>
+                                            <span class="inline-block bg-white px-2 py-0.5 rounded mr-2">
+                                                <i class="fas fa-clock mr-1"></i>{{ medicine.frequency }}
+                                            </span>
+                                            <span class="inline-block bg-white px-2 py-0.5 rounded">
+                                                <i class="fas fa-calendar-week mr-1"></i>{{ medicine.duration }}
+                                            </span>
+                                        </p>
+                                    </div>
+                                {% empty %}
+                                    <p class="text-gray-500 text-sm">No medicines prescribed</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex gap-3 mt-4 pt-2">
+                            <a href="{% url 'appointments:view_prescription' prescription.id %}" 
+                               class="flex-1 text-center bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all text-sm font-semibold shadow-md hover:shadow-lg">
+                                <i class="fas fa-eye"></i> View Details
+                            </a>
+                            <a href="{% url 'appointments:download_prescription_pdf' prescription.id %}" 
+                               class="flex-1 text-center bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all text-sm font-semibold shadow-md hover:shadow-lg">
+                                <i class="fas fa-download"></i> Download PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-white rounded-xl shadow-lg p-16 text-center border-t-4 border-t-purple-500">
+            <div class="w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-prescription-bottle text-4xl text-purple-500"></i>
+            </div>
+            <p class="text-gray-500 text-lg font-semibold">No Prescriptions Yet</p>
+            <p class="text-gray-400 mt-2">Your prescriptions will appear here after your appointments</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
