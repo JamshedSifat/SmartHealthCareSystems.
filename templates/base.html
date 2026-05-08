@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 {% load static %}
 
@@ -7,25 +8,345 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="{% static 'image/favicon.png' %}" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2563eb;
+        }
+
+        * {
+            transition: all 0.2s ease-in-out;
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        /* Navigation Links */
+        .nav-link {
+            @apply text-gray-100 px-3 py-2 rounded-lg transition duration-300 text-sm font-medium whitespace-nowrap;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #60a5fa, #93c5fd);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 70%;
+        }
+
+        .nav-link:hover {
+            @apply text-white bg-blue-500 bg-opacity-20;
+        }
+
+        .nav-link.active {
+            @apply text-white bg-blue-500 bg-opacity-30;
+        }
+
+        /* Button Styles */
+        .btn-primary {
+            @apply bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-lg font-medium transition duration-300 hover:from-green-600 hover:to-green-700 shadow-md hover:shadow-lg;
+        }
+
+        .btn-secondary {
+            @apply bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg font-medium transition duration-300 hover:from-blue-600 hover:to-blue-700 shadow-md hover:shadow-lg;
+        }
+
+        /* Dropdown Menu */
+        .dropdown-menu {
+            @apply absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 hidden group-hover:block z-50;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-item {
+            @apply block px-5 py-3 text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-blue-100 transition first:rounded-t-xl last:rounded-b-xl border-b border-gray-100 last:border-b-0 text-sm font-medium;
+        }
+
+        .dropdown-item:hover {
+            @apply text-blue-600;
+        }
+
+        .dropdown-item i {
+            @apply mr-2 w-4 text-center;
+        }
+
+        /* Mobile Menu */
+        #mobile-menu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out;
+        }
+
+        #mobile-menu.active {
+            max-height: 600px;
+        }
+
+        .mobile-nav-link {
+            @apply block text-gray-100 px-4 py-3 rounded-lg transition hover:bg-blue-500 hover:bg-opacity-30 hover:text-white font-medium border-l-4 border-transparent hover:border-blue-300;
+        }
+
+        /* Logo */
+        .logo {
+            @apply text-white font-bold text-lg md:text-xl hover:text-blue-200 transition duration-300 flex items-center gap-2 whitespace-nowrap;
+        }
+
+        /* Mobile Profile Menu */
+        #mobile-profile-menu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+
+        #mobile-profile-menu.active {
+            max-height: 300px;
+        }
+
+        /* Hamburger Menu Animation */
+        .hamburger {
+            @apply relative w-6 h-6 cursor-pointer;
+        }
+
+        .hamburger span {
+            @apply absolute left-0 h-0.5 w-full bg-white rounded transition-all duration-300;
+        }
+
+        .hamburger span:nth-child(1) {
+            top: 0;
+        }
+
+        .hamburger span:nth-child(2) {
+            top: 10px;
+        }
+
+        .hamburger span:nth-child(3) {
+            top: 20px;
+        }
+
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(8px, 8px);
+        }
+
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(8px, -8px);
+        }
+
+        /* Badge */
+        .badge {
+            @apply inline-block px-2 py-1 text-xs font-bold text-white bg-red-500 rounded-full;
+        }
+    </style>
+    
     <title>{% block title %}Home - Innovative HealthCare{% endblock %}</title>
     {% block extra_css %}{% endblock %}
+    {% block extra-styles %}{% endblock %}
 </head>
+
 <body class="bg-gray-50">
-    <!-- Navigation -->
-    <nav class="sticky top-0 z-50 bg-blue-600 shadow-lg">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
-                <div class="text-white font-bold text-xl">
-                    <a href="{% url 'home' %}">Innovative HealthCare</a>
-                </div>
-                <div class="flex space-x-6">
-                    <a href="{% url 'home' %}" class="text-white hover:text-blue-200">Home</a>
-                    <a href="#" class="text-white hover:text-blue-200">About</a>
-                    <a href="#" class="text-white hover:text-blue-200">Contact</a>
-                </div>
+
+    
+    <!-- Navigation Bar -->
+<nav class="text-white navbar sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16 gap-6">
+            
+            <!-- LEFT: Logo (Takes up 1 part of space) -->
+            <div class="flex-1 flex justify-start">
+                <a href="{% url 'home' %}" class="logo">
+                    <i class="fas fa-hospital-user text-blue-200 text-lg"></i>
+                    <span class="hidden sm:inline">Smart HealthCare</span>
+                </a>
+            </div>
+
+            <!-- CENTER: Desktop Main Navigation (Perfectly Centered) -->
+            <div class="hidden lg:flex items-center justify-center gap-5 absolute left-1/2 transform -translate-x-1/2">
+                <a href="{% url 'home' %}" class="nav-link">
+                    <i class="fas fa-home mr-1"></i>Home
+                </a>
+                <a href="{% url 'appointments:appointment' %}" class="nav-link">
+                    <i class="fas fa-calendar-check mr-1"></i>Appointments
+                </a>
+                <a href="{% url 'appointments:emergency' %}" class="nav-link">
+                    <i class="fas fa-ambulance mr-1"></i>Emergency
+                </a>
+                <a href="{% url 'reminders:dashboard' %}" class="nav-link">
+                    <i class="fas fa-pills mr-1"></i>Medicine
+                </a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'diet_compatibility:health_profile_dashboard' %}" class="nav-link">
+                        <i class="fas fa-heart mr-1"></i>Diet Dashboard
+                    </a>
+                {% endif %}
+            </div>
+
+            <!-- RIGHT: Buttons & Dropdowns (Takes up 1 part of space) -->
+            <div class="flex-1 flex items-center justify-end gap-2">
+                
+                <!-- Profile Dropdown -->
+                {% if user.is_authenticated %}
+                    <div class="relative group hidden sm:block">
+                        <button class="btn-secondary flex items-center gap-1 text-sm">
+                            <i class="fas fa-user-circle"></i>
+                            <span class="hidden md:inline">{{ user.username }}</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        
+                        <div class="dropdown-menu">
+                            <a href="{% url 'accounts:user_profile' %}" class="dropdown-item">
+                                <i class="fas fa-user"></i>My Profile
+                            </a>
+                            {% if user.is_superuser %}
+                                <a href="{% url 'admin:index' %}" class="dropdown-item">
+                                    <i class="fas fa-cog"></i>Admin Panel
+                                </a>
+                            {% endif %}
+                            <a href="{% url 'accounts:logout' %}" class="dropdown-item">
+                                <i class="fas fa-sign-out-alt text-red-500"></i>Logout
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Profile Button -->
+                    <button id="mobile-profile-btn" class="sm:hidden text-white hover:bg-blue-500 hover:bg-opacity-30 p-2 rounded-lg transition">
+                        <i class="fas fa-user-circle text-xl"></i>
+                    </button>
+                {% else %}
+                    <!-- Auth Buttons -->
+                    <a href="{% url 'accounts:login' %}" class="btn-primary hidden sm:inline-flex items-center gap-1 text-sm">
+                        <i class="fas fa-sign-in-alt"></i>Login
+                    </a>
+                    <a href="{% url 'accounts:register' %}" class="btn-secondary hidden md:inline-flex items-center gap-1 text-sm">
+                        <i class="fas fa-user-plus"></i>Sign Up
+                    </a>
+                {% endif %}
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="lg:hidden text-white">
+                    <div class="hamburger">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </button>
             </div>
         </div>
-    </nav>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="lg:hidden bg-blue-500 bg-opacity-20 rounded-lg mt-2">
+            <div class="px-3 py-3 space-y-1">
+                <a href="{% url 'home' %}" class="mobile-nav-link">
+                    <i class="fas fa-home mr-2"></i>Home
+                </a>
+                <a href="{% url 'appointments:appointment' %}" class="mobile-nav-link">
+                    <i class="fas fa-calendar-check mr-2"></i>Appointments
+                </a>
+                <a href="{% url 'appointments:emergency' %}" class="mobile-nav-link">
+                    <i class="fas fa-ambulance mr-2"></i>Emergency
+                </a>
+                <a href="{% url 'reminders:dashboard' %}" class="mobile-nav-link">
+                    <i class="fas fa-pills mr-2"></i>Medicine Reminder
+                </a>
+
+                {% if user.is_authenticated %}
+                    <a href="{% url 'diet_compatibility:health_profile_dashboard' %}" class="mobile-nav-link">
+                        <i class="fas fa-heart mr-2"></i>Diet Dashboard
+                    </a>
+
+                    {% if user.is_superuser %}
+                        <hr class="border-blue-300 my-2">
+                        <a href="{% url 'admin:index' %}" class="mobile-nav-link bg-yellow-600 hover:bg-yellow-700">
+                            <i class="fas fa-cog mr-2"></i>Admin Panel
+                        </a>
+                    {% endif %}
+                {% else %}
+                    <hr class="border-blue-300 my-2">
+                    <a href="{% url 'accounts:login' %}" class="mobile-nav-link bg-green-600 hover:bg-green-700">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Login
+                    </a>
+                    <a href="{% url 'accounts:register' %}" class="mobile-nav-link">
+                        <i class="fas fa-user-plus mr-2"></i>Sign Up
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Mobile Profile Menu -->
+        <div id="mobile-profile-menu" class="lg:hidden bg-blue-500 bg-opacity-20 rounded-lg mt-2">
+            <div class="px-3 py-3 space-y-1">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'accounts:user_profile' %}" class="mobile-nav-link">
+                        <i class="fas fa-id-card mr-2"></i>My Profile
+                    </a>
+                    <a href="{% url 'accounts:logout' %}" class="mobile-nav-link bg-red-600 hover:bg-red-700">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
 
     <!-- Main Content -->
     <main class="min-h-screen">
@@ -33,10 +354,190 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-8">
-        <div class="container mx-auto px-4 text-center">
-            <p>&copy; 2025 Innovative HealthCare. All rights reserved.</p>
+    <footer class="w-full bg-gradient-to-br from-gray-800 via-gray-900 to-black text-white mt-12">
+        <!-- Main Footer Content -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+
+                <!-- Logo and Brand Section -->
+                <div class="flex flex-col space-y-4">
+                    <div class="flex items-center space-x-3">
+                        <img src="{% static 'images/logo.svg' %}" class="w-20 h-20 rounded-full shadow-lg " alt="Logo">
+                        <div>
+                            <h2 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">
+                                Smart HealthCare
+                            </h2>
+                            <p class="text-gray-400 text-xs">Healthcare Innovation</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-300 text-sm leading-relaxed">
+                        Revolutionizing healthcare with cutting-edge technology and compassionate care.
+                    </p>
+                </div>
+
+                <!-- Services -->
+                <div>
+                    <h3 class="text-lg font-bold text-cyan-300 mb-4">Services</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="{% url 'appointments:appointment' %}" class="text-gray-300 hover:text-cyan-300 transition flex items-center"><i class="fas fa-angle-right mr-2"></i>Appointments</a></li>
+                        <li><a href="{% url 'reminders:dashboard' %}" class="text-gray-300 hover:text-cyan-300 transition flex items-center"><i class="fas fa-angle-right mr-2"></i>Medicine Reminder</a></li>
+                        <li><a href="{% url 'diet_compatibility:health_profile_dashboard' %}" class="text-gray-300 hover:text-cyan-300 transition flex items-center"><i class="fas fa-angle-right mr-2"></i>Diet Management</a></li>
+                        <li><a href="{% url 'appointments:emergency' %}" class="text-gray-300 hover:text-cyan-300 transition flex items-center"><i class="fas fa-angle-right mr-2"></i>Emergency</a></li>
+                    </ul>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="text-lg font-bold text-cyan-300 mb-4">Quick Links</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="text-gray-300 hover:text-cyan-300 transition flex items-center"><i class="fas fa-angle-right mr-2"></i>Privacy Policy</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-cyan-300 transition flex items-center"><i class="fas fa-angle-right mr-2"></i>Terms of Service</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-cyan-300 transition flex items-center"><i class="fas fa-angle-right mr-2"></i>Support</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-cyan-300 transition flex items-center"><i class="fas fa-angle-right mr-2"></i>Contact Us</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div>
+                    <h3 class="text-lg font-bold text-cyan-300 mb-4">Contact</h3>
+                    <ul class="space-y-3 text-sm">
+                        <li class="flex items-start space-x-3">
+                            <i class="fas fa-map-marker-alt text-blue-400 mt-1"></i>
+                            <span class="text-gray-300">Dhaka, Bangladesh</span>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <i class="fas fa-phone text-blue-400"></i>
+                            <a href="tel:+8801966147075" class="text-gray-300 hover:text-cyan-300 transition">+8801966147075</a>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <i class="fas fa-envelope text-blue-400"></i>
+                            <a href="mailto:innovative-healthcare@gmail.com" class="text-gray-300 hover:text-cyan-300 transition truncate">innovative-healthcare@gmail.com</a>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <i class="fas fa-clock text-blue-400"></i>
+                            <span class="text-gray-300">24/7 Service</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Bottom -->
+        <div class="border-t border-gray-700 bg-black bg-opacity-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 text-xs md:text-sm">
+                    <p class="text-gray-400">
+                        &copy; 2025 <span class="text-cyan-300 font-medium">Innovative HealthCare</span>. All rights reserved.
+                    </p>
+                </div>
+            </div>
         </div>
     </footer>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileProfileBtn = document.getElementById('mobile-profile-btn');
+            const mobileProfileMenu = document.getElementById('mobile-profile-menu');
+            const hamburger = mobileMenuBtn?.querySelector('.hamburger');
+
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    mobileMenu.classList.toggle('active');
+                    hamburger?.classList.toggle('active');
+                    if (mobileProfileMenu) mobileProfileMenu.classList.remove('active');
+                });
+            }
+
+            if (mobileProfileBtn) {
+                mobileProfileBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (mobileProfileMenu) mobileProfileMenu.classList.toggle('active');
+                    mobileMenu.classList.remove('active');
+                    hamburger?.classList.remove('active');
+                });
+            }
+
+            document.addEventListener('click', function(e) {
+                if (!mobileMenu?.contains(e.target) && !mobileMenuBtn?.contains(e.target)) {
+                    mobileMenu?.classList.remove('active');
+                    hamburger?.classList.remove('active');
+                }
+                if (!mobileProfileMenu?.contains(e.target) && !mobileProfileBtn?.contains(e.target)) {
+                    mobileProfileMenu?.classList.remove('active');
+                }
+            });
+
+            const allLinks = document.querySelectorAll('.mobile-nav-link, .dropdown-item');
+            allLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    mobileMenu?.classList.remove('active');
+                    mobileProfileMenu?.classList.remove('active');
+                    hamburger?.classList.remove('active');
+                });
+            });
+        });
+    </script>
+
+    {% if messages %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            {% for message in messages %}
+                {% if message.tags == 'success' and 'Registration successful' in message.message %}
+                    Swal.fire({
+                        title: 'Registration Successful! 🎉',
+                        text: 'Welcome to Innovative HealthCare!',
+                        icon: 'success',
+                        confirmButtonColor: '#10B981',
+                        confirmButtonText: 'Continue to Login',
+                        allowOutsideClick: false,
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = "{% url 'accounts:login' %}";
+                        }
+                    });
+                {% elif message.tags == 'success' %}
+                    Swal.fire({
+                        title: 'Success!',
+                        text: '{{ message.message }}',
+                        icon: 'success',
+                        timer: 3000,
+                        timerProgressBar: true,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                {% elif message.tags == 'error' %}
+                    Swal.fire({
+                        title: 'Error!',
+                        text: '{{ message.message }}',
+                        icon: 'error',
+                        confirmButtonColor: '#EF4444'
+                    });
+                {% elif message.tags == 'warning' %}
+                    Swal.fire({
+                        title: 'Warning!',
+                        text: '{{ message.message }}',
+                        icon: 'warning',
+                        confirmButtonColor: '#F59E0B'
+                    });
+                {% elif message.tags == 'info' %}
+                    Swal.fire({
+                        title: 'Information',
+                        text: '{{ message.message }}',
+                        icon: 'info',
+                        confirmButtonColor: '#3B82F6'
+                    });
+                {% endif %}
+            {% endfor %}
+        });
+    </script>
+    {% endif %}
+
+    {% block extra_js %}{% endblock %}
+
 </body>
 </html>
