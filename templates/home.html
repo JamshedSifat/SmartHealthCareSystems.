@@ -1,110 +1,266 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% block extra-styles %}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 {% endblock %}
-
-{% block title %}Home - Innovative HealthCare{% endblock %}
+{% block title %}User Profile{% endblock %}
 
 {% block content %}
-<div class="min-h-screen bg-gradient-to-br from-blue-50 to-white">
 
-  <div class="container mx-auto px-6 py-16">
-    <div class="flex flex-col lg:flex-row items-center justify-between max-w-7xl mx-auto">
-
-      <div class="lg:w-1/2 text-center lg:text-left mb-12 lg:mb-0">
-        <h1 class="text-4xl lg:text-5xl font-light text-gray-800 leading-tight mb-6">
-          Welcome to
-          <span class="text-blue-600 font-bold block text-5xl lg:text-6xl mt-2">
-            Innovative HealthCare
-          </span>
-        </h1>
-        <p class="text-lg text-gray-600 leading-relaxed max-w-2xl">
-          Access a next-generation healthcare system designed for convenience — from online doctor appointments
-          and medical accessories to emergency assistance and hospital blood management.
-        </p>
-        <div class="mt-8">
-          <button class="get-started-btn bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
-            Get Started
-          </button>
+<!-- Success/Error Messages -->
+{% if messages %}
+<div class="max-w-xl mx-auto mt-4">
+    {% for message in messages %}
+    <div class="mb-4 p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 border border-green-400 text-green-700{% elif message.tags == 'error' %}bg-red-100 border border-red-400 text-red-700{% else %}bg-blue-100 border border-blue-400 text-blue-700{% endif %}">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center">
+                {% if message.tags == 'success' %}
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                {% elif message.tags == 'error' %}
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                </svg>
+                {% endif %}
+                <span class="font-medium">{{ message }}</span>
+            </div>
+            <button onclick="this.closest('.mb-4').style.display='none'" class="text-gray-500 hover:text-gray-700">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+            </button>
         </div>
-      </div>
-
-      <!-- Image -->
-      <div class="lg:w-1/2 flex justify-center">
-        <div class="relative">
-          <div class="absolute inset-0 bg-blue-200 rounded-full blur-3xl opacity-30 scale-110"></div>
-          <img src="{% static '/media/homeProfail.png' %}" alt="Healthcare Image"
-               class="relative rounded-2xl shadow-2xl max-w-md w-full h-auto object-cover">
-        </div>
-      </div>
     </div>
-  </div>
-
-  <!-- Services Section -->
-  <div class="bg-white py-20">
-    <div class="container mx-auto px-6">
-      <div class="text-center mb-16">
-        <h2 class="text-4xl lg:text-5xl font-light text-gray-800 mb-4">
-          We <span class="text-blue-600 font-semibold">Offer</span>
-        </h2>
-        <div class="w-24 h-1 bg-blue-600 mx-auto"></div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-        
-        <!-- Card 1: Online Doctor Appointments -->
-        <div class="bg-white rounded-2xl shadow-lg p-8 text-center hover:scale-105 transform transition duration-300 border-t-4 border-blue-600">
-          <div class="text-5xl mb-6">👨‍⚕️</div>
-          <h3 class="text-xl font-semibold mb-4 text-gray-800">Online Doctor Appointments</h3>
-          <p class="text-gray-600 text-sm leading-relaxed">
-            Book appointments with experienced doctors anytime, anywhere, without waiting in queues.
-          </p>
-          <button class="mt-6 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
-            Book Now
-          </button>
-        </div>
-
-        <!-- Card 2: Hospital Blood Management -->
-        <div class="bg-white rounded-2xl shadow-lg p-8 text-center hover:scale-105 transform transition duration-300 border-t-4 border-red-600">
-          <div class="text-5xl mb-6">🩸</div>
-          <h3 class="text-xl font-semibold mb-4 text-gray-800">Hospital Blood Management</h3>
-          <p class="text-gray-600 text-sm leading-relaxed">
-            Access real-time blood availability in hospitals and request emergency assistance when needed.
-          </p>
-          <button class="mt-6 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition text-sm font-semibold">
-            Find Blood
-          </button>
-        </div>
-
-        <!-- Card 3: Diet Compatibility -->
-        <div class="bg-white rounded-2xl shadow-lg p-8 text-center hover:scale-105 transform transition duration-300 border-t-4 border-green-600">
-          <div class="text-5xl mb-6">🥗</div>
-          <h3 class="text-xl font-semibold mb-4 text-gray-800">Diet Compatibility</h3>
-          <p class="text-gray-600 text-sm leading-relaxed">
-            Check food compatibility with your medical conditions and get personalized diet recommendations.
-          </p>
-          <button class="mt-6 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm font-semibold">
-            Check Diet
-          </button>
-        </div>
-
-        <!-- Card 4: Medicine Reminder -->
-        <div class="bg-white rounded-2xl shadow-lg p-8 text-center hover:scale-105 transform transition duration-300 border-t-4 border-purple-600">
-          <div class="text-5xl mb-6">💊</div>
-          <h3 class="text-xl font-semibold mb-4 text-gray-800">Medicine Reminder</h3>
-          <p class="text-gray-600 text-sm leading-relaxed">
-            Never miss your medication with smart reminders and tracking of your daily medicine schedule.
-          </p>
-          <button class="mt-6 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm font-semibold">
-            Set Reminder
-          </button>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
+    {% endfor %}
 </div>
+{% endif %}
+
+<!-- View Mode -->
+<div id="userProfileView" class="max-w-xl mx-auto mt-8 bg-white rounded-xl shadow-md p-8">
+    <h2 class="text-2xl font-bold mb-6 text-blue-700">User Profile</h2>
+    <div class="mb-6 space-y-2">
+        <p><span class="font-semibold text-gray-700">Username:</span> <span class="text-gray-900">{{ user_profile.user.username }}</span></p>
+        <p><span class="font-semibold text-gray-700">Name:</span> <span class="text-gray-900">{{ user_profile.user.first_name }} {{ user_profile.user.last_name }}</span></p>
+        <p><span class="font-semibold text-gray-700">Email:</span> <span class="text-gray-900">{{ user_profile.user.email }}</span></p>
+        <p><span class="font-semibold text-gray-700">Age:</span> <span class="text-gray-900">{{ user_profile.age }}</span></p>
+        <p><span class="font-semibold text-gray-700">Address:</span> <span class="text-gray-900">{{ user_profile.address|default:"Not provided" }}</span></p>
+        <p><span class="font-semibold text-gray-700">Mobile:</span> <span class="text-gray-900">{{ user_profile.mobile|default:"Not provided" }}</span></p>
+        <p><span class="font-semibold text-gray-700">Gender:</span> <span class="text-gray-900">{{ user_profile.gender }}</span></p>
+    </div>
+
+    <div class="flex justify-between items-center mt-8">
+        <button id="editButton" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Edit Profile</button>
+        <form method="post" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone!');">
+            {% csrf_token %}
+            <button type="submit" name="delete_account" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition">Delete Account</button>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Mode -->
+<div id="userProfileEdit" class="max-w-xl mx-auto mt-8 bg-white rounded-xl shadow-md p-8" style="display: none;">
+    <form method="post" id="profileForm" class="space-y-6">
+        <h2 class="text-2xl font-bold mb-6 text-blue-700">Edit Your Information</h2>
+        {% csrf_token %}
+        
+        <!-- Display form errors -->
+        {% if profile_form.errors or user_form.errors %}
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <strong class="font-bold">Please fix the following errors:</strong>
+            <ul class="mt-2 list-disc list-inside">
+                {% for field in user_form %}
+                    {% for error in field.errors %}
+                        <li>{{ field.label }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for field in profile_form %}
+                    {% for error in field.errors %}
+                        <li>{{ field.label }}: {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+        
+        <div class="grid grid-cols-1 gap-4">
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Username</label>
+                <input type="text" value="{{ user_profile.user.username }}" readonly class="w-full px-4 py-2 rounded border border-gray-300 bg-gray-100 cursor-not-allowed">
+            </div>
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">First Name</label>
+                {{ user_form.first_name }}
+                {% if user_form.first_name.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ user_form.first_name.errors.0 }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Last Name</label>
+                {{ user_form.last_name }}
+                {% if user_form.last_name.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ user_form.last_name.errors.0 }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Email</label>
+                {{ user_form.email }}
+                {% if user_form.email.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ user_form.email.errors.0 }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Age</label>
+                {{ profile_form.age }}
+                {% if profile_form.age.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ profile_form.age.errors.0 }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Address</label>
+                {{ profile_form.address }}
+                {% if profile_form.address.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ profile_form.address.errors.0 }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Mobile</label>
+                {{ profile_form.mobile }}
+                {% if profile_form.mobile.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ profile_form.mobile.errors.0 }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Gender</label>
+                {{ profile_form.gender }}
+                {% if profile_form.gender.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ profile_form.gender.errors.0 }}</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="flex justify-end space-x-2 pt-4">
+            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">Save Changes</button>
+            <button type="button" id="cancelButton" class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 transition">Cancel</button>
+        </div>
+    </form>
+</div>
+
+<!-- Appointments Section -->
+{% if appointments %}
+<h2 class="max-w-xl mx-auto mt-12 text-xl font-bold text-blue-700">Your Appointments</h2>
+<div class="max-w-xl mx-auto mt-4 grid gap-4">
+    {% for appointment in appointments %}
+    <div class="bg-blue-400 rounded-lg p-4 shadow text-white">
+        <p><span class="font-semibold">Doctor:</span> {{ appointment.doctor.name }}</p>
+        <p><span class="font-semibold">Appointment Date:</span> {{ appointment.appointment_date }}</p>
+        <p><span class="font-semibold">Time:</span> {{ appointment.doctor_time_slot.start_time }} - {{ appointment.doctor_time_slot.end_time }}</p>
+        <p><span class="font-semibold">Serial:</span> {{ appointment.serial_number }}</p>
+        <p><span class="font-semibold">Description:</span> {{ appointment.description }}</p>
+        <form method="post" action="{% url 'appointments:cancel_appointment' appointment.id appointment.doctor.id %}" onsubmit="return confirm('Cancel this appointment?');">
+            {% csrf_token %}
+            <button type="submit" class="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition">Cancel Appointment</button>
+        </form>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Bills Section -->
+{% if bills %}
+<h2 class="max-w-xl mx-auto mt-12 text-xl font-bold text-blue-700">Payment History</h2>
+<div class="max-w-xl mx-auto mt-4 grid gap-4">
+    {% for bill in bills %}
+    <div class="bg-green-400 rounded-lg p-4 shadow text-black">
+        <p><span class="font-semibold">Customer Name:</span> {{ bill.customer.username }}</p>
+        <p class="font-semibold">Items:</p>
+        <ul class="ml-4 list-disc text-sm">
+            {% for bill_item in bill.billitem_set.all %}
+                <li>{{ bill_item.accessory.p_name }} ({{ bill_item.quantity }} x {{ bill_item.accessory.p_cost }} = {{ bill_item.total_cost }} tk)</li>
+            {% endfor %}
+        </ul>
+        <p><span class="font-semibold">Total Cost:</span> {{ bill.total_item_cost }} tk</p>
+        <p><span class="font-semibold">Created At:</span> {{ bill.created_at }}</p>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const viewMode = document.getElementById("userProfileView");
+        const editMode = document.getElementById("userProfileEdit");
+        const editButton = document.getElementById("editButton");
+        const cancelButton = document.getElementById("cancelButton");
+        
+        // Show edit mode if there are form errors
+        {% if profile_form.errors or user_form.errors %}
+            viewMode.style.display = "none";
+            editMode.style.display = "block";
+        {% endif %}
+
+        if (editButton) {
+            editButton.addEventListener("click", () => {
+                viewMode.style.display = "none";
+                editMode.style.display = "block";
+            });
+        }
+
+        if (cancelButton) {
+            cancelButton.addEventListener("click", () => {
+                viewMode.style.display = "block";
+                editMode.style.display = "none";
+            });
+        }
+        
+        // Auto-hide messages after 5 seconds
+        setTimeout(function() {
+            const messages = document.querySelectorAll('[class*="bg-green-100"], [class*="bg-red-100"]');
+            messages.forEach(function(message) {
+                message.style.transition = "opacity 0.5s";
+                message.style.opacity = "0";
+                setTimeout(function() {
+                    if (message.parentNode) {
+                        message.style.display = "none";
+                    }
+                }, 500);
+            });
+        }, 5000);
+    });
+</script>
+
+<!-- Loading Spinner -->
+<div id="loadingSpinner" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999;">
+    <div class="bg-white rounded-lg p-4 shadow-xl">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+        <p class="mt-2 text-sm text-gray-600">Updating profile...</p>
+    </div>
+</div>
+
+<script>
+    // Show spinner on form submit
+    const profileForm = document.getElementById('profileForm');
+    if (profileForm) {
+        profileForm.addEventListener('submit', function() {
+            const spinner = document.getElementById('loadingSpinner');
+            if (spinner) {
+                spinner.style.display = 'block';
+            }
+        });
+    }
+</script>
+
+<style>
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+    .animate-spin {
+        animation: spin 1s linear infinite;
+    }
+</style>
 {% endblock %}
