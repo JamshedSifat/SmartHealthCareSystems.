@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Meal{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-8 text-white">
+            <h1 class="text-3xl font-bold mb-2">
+                <i class="fas fa-utensils mr-2"></i>Add Meal
+            </h1>
+            <p class="text-purple-100">Select foods to add to your meal plan</p>
+        </div>
+
+        <!-- Form -->
+        <form method="post" class="p-8 space-y-6">
+            {% csrf_token %}
+
+            <!-- Meal Type -->
+            <div>
+                <label class="block text-lg font-bold text-gray-800 mb-4">
+                    <i class="fas fa-bowl-food text-purple-600 mr-2"></i>Meal Type *
+                </label>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <label class="flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-purple-600">
+                        <input type="radio" name="meal_type" value="breakfast" required class="w-4 h-4">
+                        <span class="ml-2 font-semibold">🌅 Breakfast</span>
+                    </label>
+                    <label class="flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-purple-600">
+                        <input type="radio" name="meal_type" value="lunch" required class="w-4 h-4">
+                        <span class="ml-2 font-semibold">🍽️ Lunch</span>
+                    </label>
+                    <label class="flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-purple-600">
+                        <input type="radio" name="meal_type" value="dinner" required class="w-4 h-4">
+                        <span class="ml-2 font-semibold">🍲 Dinner</span>
+                    </label>
+                    <label class="flex items-center p-4 border-2 border-gray-300 rounded-lg cursor-pointer hover:border-purple-600">
+                        <input type="radio" name="meal_type" value="snack" required class="w-4 h-4">
+                        <span class="ml-2 font-semibold">🍪 Snack</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Date -->
+            <div>
+                <label class="block text-lg font-bold text-gray-800 mb-3">
+                    <i class="fas fa-calendar text-purple-600 mr-2"></i>Date *
+                </label>
+                <input type="date" name="date" value="{% now 'Y-m-d' %}"
+                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                       required>
+            </div>
+
+            <!-- Foods Selection -->
+            <div>
+                <label class="block text-lg font-bold text-gray-800 mb-4">
+                    <i class="fas fa-apple-alt text-green-600 mr-2"></i>Select Foods *
+                </label>
+
+                <div id="foodsContainer" class="space-y-3">
+                    <div class="food-item bg-gray-50 p-4 rounded-lg border-l-4 border-purple-600">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                            <div>
+                                <label class="text-sm font-bold text-gray-700 block mb-1">Food</label>
+                                <select name="food_ids" class="food-select w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600">
+                                    <option value="">Select Food</option>
+                                    {% for food in foods %}
+                                        <option value="{{ food.id }}">
+                                            {{ food.name }} ({{ food.calories_per_100g }} kcal/100g)
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="text-sm font-bold text-gray-700 block mb-1">Quantity (grams)</label>
+                                <input type="number" name="quantities" min="1" max="1000" value="100"
+                                       class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+                                       placeholder="100">
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="removeFoodItem(this)"
+                                class="text-red-600 hover:text-red-700 text-sm font-semibold">
+                            <i class="fas fa-trash mr-1"></i>Remove
+                        </button>
+                    </div>
+                </div>
+
+                <button type="button" onclick="addFoodItem()"
+                        class="mt-4 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition">
+                    <i class="fas fa-plus mr-2"></i>Add Another Food
+                </button>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-3 pt-4 border-t">
+                <button type="submit" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-3 rounded-lg font-bold transition shadow-lg">
+                    <i class="fas fa-save mr-2"></i>Save Meal
+                </button>
+                <a href="{% url 'diet_compatibility:meal_plan' %}"
+                   class="flex-1 text-center bg-gray-300 hover:bg-gray-400 text-gray-800 py-3 rounded-lg font-bold transition">
+                    <i class="fas fa-times mr-2"></i>Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function addFoodItem() {
+        const container = document.getElementById('foodsContainer');
+        const template = container.querySelector('.food-item').innerHTML;
+        
+        const newItem = document.createElement('div');
+        newItem.className = 'food-item bg-gray-50 p-4 rounded-lg border-l-4 border-purple-600';
+        newItem.innerHTML = template;
+        
+        container.appendChild(newItem);
+    }
+
+    function removeFoodItem(button) {
+        const items = document.querySelectorAll('.food-item');
+        if (items.length > 1) {
+            button.closest('.food-item').remove();
+        } else {
+            alert('At least one food is required!');
+        }
+    }
+</script>
+{% endblock %}
