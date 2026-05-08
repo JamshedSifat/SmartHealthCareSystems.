@@ -6,9 +6,16 @@ from django.utils import timezone
 from django.db.models import Avg, Count, Q
 from django.http import FileResponse, HttpResponse
 import json
-from .forms import (
-    RescheduleForm
+from .models import (
+    Doctor, DoctorReview, DoctorTimeSlot, Appointment, 
+    Prescription, Hospital, Blood, Medicine
 )
+from .forms import (
+    DoctorReviewForm, RescheduleForm, PrescriptionForm, 
+    AppointmentForm, MedicineForm
+)
+from .pdf_generator import generate_prescription_pdf
+
 # ============ Appointment Views ============
 
 def appointment(request):
@@ -381,4 +388,163 @@ def top_doctors(request):
         'doctors': doctors,
         'total_doctors': doctors.count()
     })
+
+# ============ Prescription Views ============
+
+@login_required
+def upload_prescription(request, appointment_id):
+    """Upload prescription (Doctor only)"""
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    doctor = appointment.doctor
+    
+    if request.user != doctor.user:
+        messages.error(request, "You do not have permission.")
+        return redirect('appointments:appointment')
+    
+    if request.method == 'POST':
+        form = PrescriptionForm(request.POST)
+        if form.is_valid():
+            prescription, created = Prescription.objects.update_or_create(
+                appointment=appointment,
+                defaults={
+                    'doctor': doctor,
+                    'patient': appointment.user,
+                    'diagnosis': form.cleaned_data['diagnosis'],
+                    'notes': form.cleaned_data['notes']
+                }
+            )
+            
+            # Add medicines
+            prescription.medicines.set(form.cleaned_data['medicines'])
+            prescription.save()
+            
+            messages.success(request, "Prescription saved successfully.")
+            return redirect('appointments:doctor_prescriptions_list')
+    else:
+        form = PrescriptionForm()
+    
+    return render(request, 'appointments/upload_prescription.html', {
+        'appointment': appointment,
+        'doctor': doctor,
+        'form': form
+    })
+
+
+@login_required
+def edit_prescription(request, prescription_id):
+    """Edit prescription"""
+    prescription = get_object_or_404(Prescription, id=prescription_id)
+    
+    if request.user != prescription.doctor.user:
+        messages.error(request, "You do not have permission.")
+        return redirect('appointments:appointment')
+    
+    if request.method == 'POST':
+        form = PrescriptionForm(request.POST, instance=prescription)
+        if form.is_valid():
+            prescription = form.save(commit=False)
+            prescription.save()
+            prescription.medicines.set(form.cleaned_data['medicines'])
+            
+            messages.success(request, "Prescription updated successfully.")
+            return redirect('appointments:doctor_prescriptions_list')
+    else:
+        form = PrescriptionForm(instance=prescription)
+    
+    return render(request, 'appointments/upload_prescription.html', {
+        'prescription': prescription,
+        'is_edit': True,
+        'form': form
+    })
+
+
+def prescription_history(request):
+    """View prescription history (Patient)"""
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    prescriptions = Prescription.objects.filter(patient=request.user)
+    
+    return render(request, 'appointments/prescription_history.html', {
+        'prescriptions': prescriptions,
+        'total_prescriptions': prescriptions.count()
+    })
+
+
+def view_prescription(request, prescription_id):
+    """View prescription details"""
+    prescription = get_object_or_404(Prescription, id=prescription_id)
+    
+    if request.user != prescription.patient and request.user != prescription.doctor.user:
+        messages.error(request, "You do not have permission.")
+        return redirect('appointments:appointment')
+    
+    return render(request, 'appointments/view_prescription.html', {
+        'prescription': prescription
+    })
+
+
+@login_required
+def download_prescription_pdf(request, prescription_id):
+    """Download prescription as PDF"""
+    prescription = get_object_or_404(Prescription, id=prescription_id)
+    
+    # Check permissions
+    if request.user != prescription.patient and request.user != prescription.doctor.user:
+        messages.error(request, "You do not have permission.")
+        return redirect('appointments:appointment')
+    
+    # Generate PDF
+    pdf_buffer = generate_prescription_pdf(prescription)
+    
+    # Create response
+    response = HttpResponse(pdf_buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="prescription_{prescription.id}.pdf"'
+    
+    return response
+
+
+def doctor_prescriptions_list(request):
+    """List all prescriptions for a doctor"""
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    try:
+        doctor = Doctor.objects.get(user=request.user)
+    except Doctor.DoesNotExist:
+        messages.error(request, "You are not a doctor.")
+        return redirect('appointments:appointment')
+    
+    prescriptions = Prescription.objects.filter(doctor=doctor)
+    
+    return render(request, 'appointments/doctor_prescriptions.html', {
+        'prescriptions': prescriptions,
+        'total_prescriptions': prescriptions.count()
+    })
+
+
+def medicine_reminder(request):
+    """Show medicine reminders"""
+    if not request.user.is_authenticated:
+        return redirect('login')
+    
+    prescriptions = Prescription.objects.filter(patient=request.user)
+    
+    all_medicines = []
+    for prescription in prescriptions:
+        for medicine in prescription.medicines.all():
+            all_medicines.append({
+                'name': medicine.name,
+                'dosage': medicine.dosage,
+                'frequency': medicine.frequency,
+                'duration': medicine.duration,
+                'doctor': prescription.doctor.name
+            })
+    
+    return render(request, 'appointments/medicine_reminder.html', {
+        'medicines': all_medicines,
+        'total_medicines': len(all_medicines),
+        'current_date': timezone.now()
+    })
+
 
