@@ -1,0 +1,154 @@
+<!-- diet_compatibility/templates/diet_compatibility/manage_allergies.html -->
+
+{% extends 'diet_compatibility/dashboard_layout.html' %}
+{% load static %}
+
+{% block title %}Manage Allergies{% endblock %}
+
+{% block dashboard_content %}
+
+<!-- Page Header -->
+<div class="mb-8">
+    <h1 class="text-4xl font-bold text-gray-800 mb-2">
+        <i class="fas fa-exclamation-triangle text-orange-600 mr-2"></i>Manage Your Food Allergies
+    </h1>
+    <p class="text-gray-600">Select foods you're allergic to for safer recommendations</p>
+</div>
+
+<!-- Form -->
+<form method="post" class="space-y-6">
+    {% csrf_token %}
+
+    <!-- Allergen Categories -->
+    <div class="space-y-6">
+        
+        <!-- Common Allergens -->
+        <div class="bg-white rounded-xl shadow-lg p-8 border-l-4 border-red-600">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-flag text-red-600 mr-2"></i>Common Allergens
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for food in foods %}
+                    {% if food.category in "dairy|meat|fruit" %}
+                        <label class="flex items-start p-4 bg-red-50 border-2 border-red-200 rounded-lg cursor-pointer hover:border-red-400 hover:bg-red-100 transition">
+                            <input type="checkbox" name="allergies" value="{{ food.id }}"
+                                   {% if allergy and food in allergy.foods.all %}checked{% endif %}
+                                   class="w-5 h-5 mt-1 text-red-600 focus:ring-red-600">
+                            <div class="ml-3">
+                                <p class="font-bold text-gray-800">{{ food.name }}</p>
+                                <p class="text-xs text-gray-600">{{ food.get_category_display }}</p>
+                            </div>
+                        </label>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Vegetables & Fruits -->
+        <div class="bg-white rounded-xl shadow-lg p-8 border-l-4 border-green-600">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-carrot text-green-600 mr-2"></i>Vegetables & Fruits
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for food in foods %}
+                    {% if food.category in "vegetable|fruit" %}
+                        <label class="flex items-start p-4 bg-green-50 border-2 border-green-200 rounded-lg cursor-pointer hover:border-green-400 hover:bg-green-100 transition">
+                            <input type="checkbox" name="allergies" value="{{ food.id }}"
+                                   {% if allergy and food in allergy.foods.all %}checked{% endif %}
+                                   class="w-5 h-5 mt-1 text-green-600 focus:ring-green-600">
+                            <div class="ml-3">
+                                <p class="font-bold text-gray-800">{{ food.name }}</p>
+                                <p class="text-xs text-gray-600">{{ food.get_category_display }}</p>
+                            </div>
+                        </label>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Grains & Dairy -->
+        <div class="bg-white rounded-xl shadow-lg p-8 border-l-4 border-yellow-600">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-wheat text-yellow-600 mr-2"></i>Grains & Dairy
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for food in foods %}
+                    {% if food.category in "grain|dairy" %}
+                        <label class="flex items-start p-4 bg-yellow-50 border-2 border-yellow-200 rounded-lg cursor-pointer hover:border-yellow-400 hover:bg-yellow-100 transition">
+                            <input type="checkbox" name="allergies" value="{{ food.id }}"
+                                   {% if allergy and food in allergy.foods.all %}checked{% endif %}
+                                   class="w-5 h-5 mt-1 text-yellow-600 focus:ring-yellow-600">
+                            <div class="ml-3">
+                                <p class="font-bold text-gray-800">{{ food.name }}</p>
+                                <p class="text-xs text-gray-600">{{ food.get_category_display }}</p>
+                            </div>
+                        </label>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Spices & Beverages -->
+        <div class="bg-white rounded-xl shadow-lg p-8 border-l-4 border-orange-600">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-pepper-hot text-orange-600 mr-2"></i>Spices & Beverages
+            </h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for food in foods %}
+                    {% if food.category in "spice|beverage|other" %}
+                        <label class="flex items-start p-4 bg-orange-50 border-2 border-orange-200 rounded-lg cursor-pointer hover:border-orange-400 hover:bg-orange-100 transition">
+                            <input type="checkbox" name="allergies" value="{{ food.id }}"
+                                   {% if allergy and food in allergy.foods.all %}checked{% endif %}
+                                   class="w-5 h-5 mt-1 text-orange-600 focus:ring-orange-600">
+                            <div class="ml-3">
+                                <p class="font-bold text-gray-800">{{ food.name }}</p>
+                                <p class="text-xs text-gray-600">{{ food.get_category_display }}</p>
+                            </div>
+                        </label>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Notes -->
+    <div class="bg-white rounded-xl shadow-lg p-8 border-l-4 border-yellow-600">
+        <label class="block text-2xl font-bold text-gray-800 mb-4">
+            <i class="fas fa-sticky-note text-yellow-600 mr-2"></i>Additional Notes (Optional)
+        </label>
+        
+        <textarea name="description" rows="4"
+                  placeholder="Add any specific allergy details, symptoms, or severity information..."
+                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-600 resize-none">{{ allergy.description|default:'' }}</textarea>
+    </div>
+
+    <!-- Important Info -->
+    <div class="bg-orange-50 border-l-4 border-orange-600 p-6 rounded-lg shadow-lg">
+        <p class="font-bold text-orange-900 mb-3">
+            <i class="fas fa-exclamation-circle mr-2"></i>Important Information
+        </p>
+        <ul class="text-sm text-orange-800 space-y-2">
+            <li>✓ Be thorough in listing all allergies</li>
+            <li>✓ Include cross-reactive foods if known</li>
+            <li>✓ Update if new allergies are discovered</li>
+            <li>✓ Consult a doctor for severe allergies</li>
+        </ul>
+    </div>
+
+    <!-- Buttons -->
+    <div class="flex gap-3">
+        <button type="submit" class="flex-1 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white py-3 rounded-lg font-bold transition shadow-lg flex items-center justify-center gap-2">
+            <i class="fas fa-save"></i>Save Allergies
+        </button>
+        <a href="{% url 'diet_compatibility:health_profile_dashboard' %}"
+           class="flex-1 text-center bg-gray-300 hover:bg-gray-400 text-gray-800 py-3 rounded-lg font-bold transition flex items-center justify-center gap-2">
+            <i class="fas fa-times"></i>Cancel
+        </a>
+    </div>
+</form>
+
+{% endblock %}
