@@ -1,0 +1,124 @@
+{% extends 'diet_compatibility/dashboard_layout.html' %}
+{% load static %}
+
+{% block title %}Meal Plan{% endblock %}
+
+{% block dashboard_content %}
+
+<!-- Page Header -->
+<div class="mb-8 flex justify-between items-center">
+    <div>
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">
+            <i class="fas fa-calendar-alt text-purple-600"></i> Today's Meal Plan
+        </h1>
+        <p class="text-gray-600">Track and manage your daily meals</p>
+    </div>
+    
+    <a href="{% url 'diet_compatibility:create_meal' %}"
+       class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-lg font-bold transition shadow-lg flex items-center gap-2">
+        <i class="fas fa-plus"></i> Add Meal
+    </a>
+</div>
+
+<!-- Calorie Summary -->
+<div class="bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl p-8 mb-8 shadow-lg">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+            <p class="text-orange-100 text-sm mb-1"><i class="fas fa-fire mr-2"></i>Today's Intake</p>
+            <p class="text-5xl font-bold">{{ total_calories }}</p>
+            <p class="text-orange-100 text-xs mt-1">kcal</p>
+        </div>
+
+        <div class="border-l border-r border-white/30">
+            <p class="text-orange-100 text-sm mb-1"><i class="fas fa-target mr-2"></i>Daily Need</p>
+            <p class="text-5xl font-bold">{{ daily_need }}</p>
+            <p class="text-orange-100 text-xs mt-1">kcal</p>
+        </div>
+
+        <div>
+            <p class="text-orange-100 text-sm mb-1"><i class="fas fa-balance-scale mr-2"></i>Remaining</p>
+            <p class="text-5xl font-bold">{{ daily_need|add:total_calories|stringformat:"-d" }}</p>
+            <p class="text-orange-100 text-xs mt-1">kcal left</p>
+        </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="mt-6">
+        <div class="bg-white/20 rounded-full h-3 overflow-hidden">
+            <div class="bg-white h-full rounded-full transition-all" 
+                 style="width: {% widthratio total_calories daily_need 100 %}%;"></div>
+        </div>
+        <p class="text-sm mt-2 text-orange-100">
+            {% widthratio total_calories daily_need 100 %}% of daily goal
+        </p>
+    </div>
+</div>
+
+<!-- Meals List -->
+{% if meals %}
+    <div class="grid grid-cols-1 gap-6">
+        {% for meal in meals %}
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition">
+                <div class="bg-gradient-to-r from-purple-500 to-pink-500 p-6 text-white">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-2xl font-bold">
+                            {% if meal.meal_type == 'breakfast' %}
+                                🌅 Breakfast
+                            {% elif meal.meal_type == 'lunch' %}
+                                🍽️ Lunch
+                            {% elif meal.meal_type == 'dinner' %}
+                                🍲 Dinner
+                            {% else %}
+                                🍪 Snack
+                            {% endif %}
+                        </h3>
+                        <span class="bg-white/20 px-4 py-2 rounded-lg font-bold text-lg">
+                            {{ meal.get_total_calories|floatformat:0 }} kcal
+                        </span>
+                    </div>
+                </div>
+
+                <div class="p-6">
+                    <!-- Food Items -->
+                    <div class="space-y-3 mb-6">
+                        {% for meal_food in meal.mealfood_set.all %}
+                            <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg border-l-4 border-purple-600 hover:bg-gray-100 transition">
+                                <div>
+                                    <p class="font-bold text-gray-800">{{ meal_food.food.name }}</p>
+                                    <p class="text-sm text-gray-600">{{ meal_food.quantity_grams }}g • {{ meal_food.get_calories|floatformat:0 }} kcal</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="text-gray-400 hover:text-gray-600 transition" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="text-red-400 hover:text-red-600 transition" title="Remove">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Delete Button -->
+                    <a href="{% url 'diet_compatibility:delete_meal' meal.id %}"
+                       onclick="return confirm('Delete this meal?')"
+                       class="w-full text-center bg-red-100 text-red-600 hover:bg-red-200 py-2 rounded-lg font-semibold transition">
+                        <i class="fas fa-trash mr-2"></i>Delete Meal
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-center py-16 bg-white rounded-xl shadow-lg">
+        <i class="fas fa-plate-wheat text-6xl text-gray-300 mb-4"></i>
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">No Meals Today</h2>
+        <p class="text-gray-600 mb-6">Start tracking your meals by adding your first one</p>
+        <a href="{% url 'diet_compatibility:create_meal' %}"
+           class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-bold transition">
+            <i class="fas fa-plus mr-2"></i>Add First Meal
+        </a>
+    </div>
+{% endif %}
+
+{% endblock %}
