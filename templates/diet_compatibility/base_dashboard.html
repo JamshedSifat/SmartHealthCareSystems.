@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    
+    <!-- Navigation Bar (Compact Button Style) -->
+    <div class="bg-white shadow-md sticky top-16 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex flex-wrap gap-2 items-center">
+                
+                <!-- Home Button -->
+                <a href="{% url 'diet_compatibility:health_profile_dashboard' %}" 
+                   class="nav-btn active">
+                    <i class="fas fa-home"></i>
+                    <span class="hidden sm:inline">Dashboard</span>
+                </a>
+
+                <!-- Profile Button -->
+                <a href="{% url 'diet_compatibility:create_health_profile' %}" 
+                   class="nav-btn">
+                    <i class="fas fa-user-heart"></i>
+                    <span class="hidden sm:inline">My Profile</span>
+                </a>
+
+                <!-- Meal Plan Button -->
+                <a href="{% url 'diet_compatibility:meal_plan' %}" 
+                   class="nav-btn">
+                    <i class="fas fa-utensils"></i>
+                    <span class="hidden sm:inline">Meal Plan</span>
+                </a>
+
+                <!-- Disease Diet Button -->
+                <a href="{% url 'diet_compatibility:disease_diet' %}" 
+                   class="nav-btn">
+                    <i class="fas fa-apple-alt"></i>
+                    <span class="hidden sm:inline">Disease Diet</span>
+                </a>
+
+                <!-- Medicine Compatibility Button -->
+                <a href="{% url 'diet_compatibility:medicine_compatibility' %}" 
+                   class="nav-btn">
+                    <i class="fas fa-capsules"></i>
+                    <span class="hidden sm:inline">Medicine</span>
+                </a>
+
+                <!-- Calorie Counter Button -->
+                <a href="{% url 'diet_compatibility:calorie_counter' %}" 
+                   class="nav-btn">
+                    <i class="fas fa-fire"></i>
+                    <span class="hidden sm:inline">Calories</span>
+                </a>
+
+                <!-- Daily Log Button -->
+                <a href="{% url 'diet_compatibility:daily_log' %}" 
+                   class="nav-btn">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span class="hidden sm:inline">Daily Log</span>
+                </a>
+
+                <!-- Diet Compatibility Button -->
+                <a href="{% url 'diet_compatibility:diet_compatibility' %}" 
+                   class="nav-btn">
+                    <i class="fas fa-shield-alt"></i>
+                    <span class="hidden sm:inline">Diet Check</span>
+                </a>
+
+                <!-- Allergies Button -->
+                <a href="{% url 'diet_compatibility:manage_allergies' %}" 
+                   class="nav-btn">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span class="hidden sm:inline">Allergies</span>
+                </a>
+
+                <!-- Recommendations Button -->
+                <a href="{% url 'diet_compatibility:recommendations' %}" 
+                   class="nav-btn">
+                    <i class="fas fa-lightbulb"></i>
+                    <span class="hidden sm:inline">Tips</span>
+                </a>
+
+                <!-- Divider -->
+                <div class="w-full sm:w-auto border-t sm:border-t-0 sm:border-l border-gray-300 sm:h-6 my-2 sm:my-0"></div>
+
+                <!-- Back to Home Button -->
+                <a href="{% url 'home' %}" 
+                   class="nav-btn ml-auto text-red-600 hover:bg-red-50">
+                    <i class="fas fa-arrow-left"></i>
+                    <span class="hidden sm:inline">Back Home</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        {% block dashboard_content %}
+        <!-- Page content goes here -->
+        {% endblock %}
+    </div>
+</div>
+
+<style>
+    .nav-btn {
+        @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-gray-100 transition duration-300 whitespace-nowrap border-2 border-transparent;
+    }
+
+    .nav-btn:hover {
+        @apply bg-gradient-to-r from-purple-50 to-pink-50 text-purple-700;
+    }
+
+    .nav-btn.active {
+        @apply bg-gradient-to-r from-purple-600 to-pink-600 text-white border-purple-600;
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 640px) {
+        .nav-btn {
+            @apply px-3 py-2 text-sm;
+        }
+    }
+</style>
+
+<script>
+    // Update active button based on current URL
+    document.addEventListener('DOMContentLoaded', function() {
+        const navBtns = document.querySelectorAll('.nav-btn');
+        const currentPath = window.location.pathname;
+
+        navBtns.forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('href') === currentPath) {
+                btn.classList.add('active');
+            }
+        });
+    });
+</script>
+
+{% endblock %}
