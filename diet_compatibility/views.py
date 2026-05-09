@@ -243,6 +243,34 @@ def delete_meal(request, meal_id):
     messages.success(request, "Meal deleted!")
     return redirect('diet_compatibility:meal_plan')
 
+# ============ DAILY LOG ============
+@login_required
+def daily_log(request):
+    """View daily log"""
+    today = timezone.now().date()
+    daily_log, _ = DailyLog.objects.get_or_create(user=request.user, date=today)
+    
+    context = {
+        'daily_log': daily_log,
+    }
+    
+    return render(request, 'diet_compatibility/daily_log.html', context)
+
+
+@login_required
+def update_daily_log(request):
+    """Update daily log"""
+    if request.method == 'POST':
+        today = timezone.now().date()
+        daily_log, _ = DailyLog.objects.get_or_create(user=request.user, date=today)
+        
+        daily_log.water_intake_ml = int(request.POST.get('water_intake', 0))
+        daily_log.notes = request.POST.get('notes', '')
+        daily_log.save()
+        
+        messages.success(request, "Daily log updated!")
+        return redirect('diet_compatibility:daily_log')
+
 # ============ DIET COMPATIBILITY ============
 @login_required
 def diet_compatibility(request):
@@ -331,6 +359,7 @@ def manage_allergies(request):
     }
     
     return render(request, 'diet_compatibility/manage_allergies.html', context)
+
 
 
 
