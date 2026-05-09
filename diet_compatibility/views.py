@@ -118,6 +118,52 @@ def disease_detail(request, disease_id):
     return render(request, 'diet_compatibility/disease_detail.html', context)
 
 
+# ============ MEDICINE COMPATIBILITY ============
+@login_required
+def medicine_compatibility(request):
+    """Medicine-food compatibility"""
+    try:
+        profile = request.user.health_profile
+    except HealthProfile.DoesNotExist:
+        messages.error(request, "Please create health profile first!")
+        return redirect('diet_compatibility:create_health_profile')
+    
+    user_medicines = profile.medicines.all()
+    compatibilities = []
+    
+    for medicine in user_medicines:
+        compat = MedicineFoodCompatibility.objects.filter(medicine=medicine)
+        compatibilities.append({
+            'medicine': medicine,
+            'interactions': compat
+        })
+    
+    context = {
+        'user_medicines': user_medicines,
+        'compatibilities': compatibilities,
+    }
+    
+    return render(request, 'diet_compatibility/medicine_compatibility.html', context)
+
+
+@login_required
+def medicine_detail(request, medicine_id):
+    """Medicine detail with food interactions"""
+    medicine = get_object_or_404(Medicine, id=medicine_id)
+    interactions = MedicineFoodCompatibility.objects.filter(medicine=medicine)
+    
+    avoid_foods = interactions.filter(interaction_level='avoid')
+    caution_foods = interactions.filter(interaction_level='caution')
+    safe_foods = interactions.filter(interaction_level='safe')
+    
+    context = {
+        'medicine': medicine,
+        'avoid_foods': avoid_foods,
+        'caution_foods': caution_foods,
+        'safe_foods': safe_foods,
+    }
+    
+    return render(request, 'diet_compatibility/medicine_detail.html', context)
 # ============ MEAL PLANNING ============
 @login_required
 def meal_plan(request):
@@ -196,6 +242,95 @@ def delete_meal(request, meal_id):
     meal.delete()
     messages.success(request, "Meal deleted!")
     return redirect('diet_compatibility:meal_plan')
+
+# ============ DIET COMPATIBILITY ============
+@login_required
+def diet_compatibility(request):
+    """Check diet compatibility"""
+    try:
+        profile = request.user.health_profile
+    except HealthProfile.DoesNotExist:
+        messages.error(request, "Please create health profile!")
+        return redirect('diet_compatibility:create_health_profile')
+    
+    diseases = profile.diseases.all()
+    medicines = profile.medicines.all()
+    
+    try:
+        allergies = request.user.allergy_profile.foods.all()
+    except:
+        allergies = []
+    
+    all_foods = Food.objects.all()
+    
+    food_status = {}
+    for food in all_foods:
+        status = {'safe': True, 'warnings': [], 'avoid': False}
+        
+        # Check disease compatibility
+        for disease in diseases:
+            disease_food = DiseaseFood.objects.filter(disease=disease, food=food).first()
+            if disease_food:
+                if disease_food.status == 'avoid':
+                    status['avoid'] = True
+                    status['warnings'].append(f"❌ Avoid due to {disease.name}")
+                elif disease_food.status == 'limited':
+                    status['warnings'].append(f"⚠️ Limited for {disease.name}")
+        
+        # Check medicine compatibility
+        for medicine in medicines:
+            med_compat = MedicineFoodCompatibility.objects.filter(medicine=medicine, food=food).first()
+            if med_compat:
+                if med_compat.interaction_level == 'avoid':
+                    status['avoid'] = True
+                    status['warnings'].append(f"❌ Avoid with {medicine.name}")
+                elif med_compat.interaction_level == 'caution':
+                    status['warnings'].append(f"⚠️ Caution with {medicine.name}")
+        
+        # Check allergies
+        if food in allergies:
+            status['avoid'] = True
+            status['warnings'].append("🚨 Allergy Alert!")
+        
+        food_status[food] = status
+    
+    context = {
+        'food_status': food_status,
+        'diseases': diseases,
+        'medicines': medicines,
+        'allergies': allergies,
+    }
+    
+    return render(request, 'diet_compatibility/diet_compatibility.html', context)
+
+
+# ============ ALLERGY MANAGEMENT ============
+@login_required
+def manage_allergies(request):
+    """Manage food allergies"""
+    if request.method == 'POST':
+        allergy, _ = Allergy.objects.get_or_create(user=request.user)
+        
+        allergy_food_ids = request.POST.getlist('allergies')
+        allergy.foods.set(allergy_food_ids)
+        
+        messages.success(request, "Allergies updated!")
+        return redirect('diet_compatibility:manage_allergies')
+    
+    allergy = None
+    try:
+        allergy = request.user.allergy_profile
+    except:
+        pass
+    
+    foods = Food.objects.all()
+    
+    context = {
+        'allergy': allergy,
+        'foods': foods,
+    }
+    
+    return render(request, 'diet_compatibility/manage_allergies.html', context)
 
 
 
