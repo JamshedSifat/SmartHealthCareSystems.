@@ -1,0 +1,238 @@
+{% extends 'diet_compatibility/dashboard_layout.html' %}
+{% load static %}
+
+{% block title %}Health Dashboard{% endblock %}
+
+{% block dashboard_content %}
+
+<!-- Quick Stats Section -->
+<div class="mb-8">
+    <h1 class="text-4xl font-bold text-gray-800 mb-2">
+        <i class="fas fa-heartbeat text-red-600"></i> Health Dashboard
+    </h1>
+    <p class="text-gray-600">Welcome, {{ user.first_name|default:user.username }}! 👋</p>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    
+    <!-- BMI Card -->
+    <div class="bg-gradient-to-br from-purple-500 to-pink-600 text-white rounded-xl p-6 shadow-lg hover:shadow-xl transition">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-purple-100 text-sm mb-2"><i class="fas fa-weight mr-2"></i>BMI</p>
+                <p class="text-4xl font-bold">{{ bmi }}</p>
+                <p class="text-xs mt-2 bg-white/20 px-2 py-1 rounded inline-block">{{ bmi_category }}</p>
+            </div>
+            <i class="fas fa-chart-pie text-4xl opacity-20"></i>
+        </div>
+    </div>
+
+    <!-- Today's Calories -->
+    <div class="bg-gradient-to-br from-orange-500 to-red-600 text-white rounded-xl p-6 shadow-lg hover:shadow-xl transition">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-orange-100 text-sm mb-2"><i class="fas fa-fire mr-2"></i>Today's Intake</p>
+                <p class="text-4xl font-bold">{{ today_calories }}</p>
+                <p class="text-xs mt-2">/ {{ daily_calorie_need }} kcal</p>
+            </div>
+            <i class="fas fa-flame text-4xl opacity-20"></i>
+        </div>
+    </div>
+
+    <!-- Water Intake -->
+    <div class="bg-gradient-to-br from-blue-500 to-cyan-600 text-white rounded-xl p-6 shadow-lg hover:shadow-xl transition">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-blue-100 text-sm mb-2"><i class="fas fa-droplet mr-2"></i>Water Today</p>
+                <p class="text-4xl font-bold">{{ water_intake }}</p>
+                <p class="text-xs mt-2">/ {{ water_goal }} ml</p>
+            </div>
+            <i class="fas fa-water text-4xl opacity-20"></i>
+        </div>
+    </div>
+
+    <!-- Health Status -->
+    <div class="bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-xl p-6 shadow-lg hover:shadow-xl transition">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-green-100 text-sm mb-2"><i class="fas fa-shield-alt mr-2"></i>Status</p>
+                {% if diseases %}
+                    <p class="text-4xl font-bold">{{ diseases.count }}</p>
+                    <p class="text-xs mt-2">Condition{{ diseases.count|pluralize }}</p>
+                {% else %}
+                    <p class="text-2xl font-bold">Healthy ✓</p>
+                    <p class="text-xs mt-2">No conditions</p>
+                {% endif %}
+            </div>
+            <i class="fas fa-heart text-4xl opacity-20"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+    
+    <!-- Left Column - Quick Actions -->
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-bolt text-yellow-500 mr-2"></i>Quick Actions
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                <!-- Add Meal -->
+                <a href="{% url 'diet_compatibility:create_meal' %}" 
+                   class="group bg-gradient-to-br from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 p-6 rounded-xl border-2 border-green-200 hover:border-green-400 transition">
+                    <i class="fas fa-plus-circle text-3xl text-green-600 mb-3 group-hover:scale-110 transition transform"></i>
+                    <p class="font-bold text-gray-800">Add Meal</p>
+                    <p class="text-sm text-gray-600">Log your food intake</p>
+                </a>
+
+                <!-- Track Calories -->
+                <a href="{% url 'diet_compatibility:calorie_counter' %}" 
+                   class="group bg-gradient-to-br from-orange-50 to-red-50 hover:from-orange-100 hover:to-red-100 p-6 rounded-xl border-2 border-orange-200 hover:border-orange-400 transition">
+                    <i class="fas fa-chart-line text-3xl text-orange-600 mb-3 group-hover:scale-110 transition transform"></i>
+                    <p class="font-bold text-gray-800">Track Calories</p>
+                    <p class="text-sm text-gray-600">Monitor your intake</p>
+                </a>
+
+                <!-- Log Water -->
+                <a href="{% url 'diet_compatibility:daily_log' %}" 
+                   class="group bg-gradient-to-br from-blue-50 to-cyan-50 hover:from-blue-100 hover:to-cyan-100 p-6 rounded-xl border-2 border-blue-200 hover:border-blue-400 transition">
+                    <i class="fas fa-glass-water text-3xl text-blue-600 mb-3 group-hover:scale-110 transition transform"></i>
+                    <p class="font-bold text-gray-800">Log Water</p>
+                    <p class="text-sm text-gray-600">Stay hydrated</p>
+                </a>
+
+                <!-- View Recommendations -->
+                <a href="{% url 'diet_compatibility:recommendations' %}" 
+                   class="group bg-gradient-to-br from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 p-6 rounded-xl border-2 border-purple-200 hover:border-purple-400 transition">
+                    <i class="fas fa-lightbulb text-3xl text-purple-600 mb-3 group-hover:scale-110 transition transform"></i>
+                    <p class="font-bold text-gray-800">Recommendations</p>
+                    <p class="text-sm text-gray-600">Get personalized tips</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Today's Meals -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mt-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-utensils text-purple-600 mr-2"></i>Today's Meals
+            </h2>
+
+            {% if today_meals %}
+                <div class="space-y-4">
+                    {% for meal in today_meals %}
+                        <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border-l-4 border-purple-600">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-bold text-gray-800">
+                                        {% if meal.meal_type == 'breakfast' %}
+                                            🌅 Breakfast
+                                        {% elif meal.meal_type == 'lunch' %}
+                                            🍽️ Lunch
+                                        {% elif meal.meal_type == 'dinner' %}
+                                            🍲 Dinner
+                                        {% else %}
+                                            🍪 Snack
+                                        {% endif %}
+                                    </p>
+                                    <p class="text-sm text-gray-600">{{ meal.mealfood_set.count }} food{{ meal.mealfood_set.count|pluralize }}</p>
+                                </div>
+                                <span class="bg-purple-600 text-white px-4 py-2 rounded-lg font-bold">
+                                    {{ meal.get_total_calories|floatformat:0 }} kcal
+                                </span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-8 bg-gray-50 rounded-lg">
+                    <i class="fas fa-plate-wheat text-4xl text-gray-300 mb-3"></i>
+                    <p class="text-gray-600 mb-4">No meals logged yet</p>
+                    <a href="{% url 'diet_compatibility:create_meal' %}" 
+                       class="inline-block bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700 transition">
+                        Add Your First Meal
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right Column - Health Info -->
+    <div class="space-y-8">
+        
+        <!-- Health Conditions -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-stethoscope text-red-600 mr-2"></i>Conditions
+            </h3>
+            
+            {% if diseases %}
+                <div class="space-y-2">
+                    {% for disease in diseases %}
+                        <div class="bg-red-50 p-3 rounded-lg border-l-4 border-red-600">
+                            <p class="font-semibold text-gray-800">{{ disease.name }}</p>
+                            <p class="text-xs text-gray-600 mt-1">Severity: {{ disease.get_severity_level_display }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-600 text-sm py-4">✓ No health conditions</p>
+            {% endif %}
+        </div>
+
+        <!-- Medicines -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-pills text-blue-600 mr-2"></i>Medicines
+            </h3>
+            
+            {% if medicines %}
+                <div class="space-y-2">
+                    {% for medicine in medicines %}
+                        <div class="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-600">
+                            <p class="font-semibold text-gray-800">{{ medicine.name }}</p>
+                            <p class="text-xs text-gray-600 mt-1">{{ medicine.purpose }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-600 text-sm py-4">No medicines added</p>
+            {% endif %}
+        </div>
+
+        <!-- Allergies -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-exclamation-circle text-orange-600 mr-2"></i>Allergies
+            </h3>
+            
+            {% if allergies %}
+                <div class="space-y-2">
+                    {% for allergy in allergies %}
+                        <div class="bg-orange-50 p-3 rounded-lg border-l-4 border-orange-600">
+                            <p class="font-semibold text-gray-800">{{ allergy.name }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-600 text-sm py-4">No allergies recorded</p>
+            {% endif %}
+        </div>
+
+        <!-- Health Tips -->
+        <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl shadow-lg p-6 border-l-4 border-yellow-600">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">
+                <i class="fas fa-lightbulb text-yellow-600 mr-2"></i>Daily Tip
+            </h3>
+            <p class="text-sm text-gray-700 leading-relaxed">
+                💧 Drink at least 2-3 liters of water daily for optimal health and better digestion.
+            </p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
