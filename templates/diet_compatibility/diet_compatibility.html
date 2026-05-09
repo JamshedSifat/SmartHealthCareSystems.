@@ -1,0 +1,125 @@
+<!-- diet_compatibility/templates/diet_compatibility/diet_compatibility.html -->
+
+{% extends 'diet_compatibility/dashboard_layout.html' %}
+{% load static %}
+
+{% block title %}Diet Compatibility Check{% endblock %}
+
+{% block dashboard_content %}
+
+<!-- Page Header -->
+<div class="mb-8">
+    <h1 class="text-4xl font-bold text-gray-800 mb-2">
+        <i class="fas fa-check-circle text-green-600"></i> Diet Compatibility Check
+    </h1>
+    <p class="text-gray-600">Smart analysis: Your diseases, medicines, and allergies</p>
+</div>
+
+<!-- Your Profile Status -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-red-50 rounded-xl p-6 border-l-4 border-red-600 shadow-lg hover:shadow-xl transition">
+        <p class="text-red-700 font-bold mb-2">🩺 Health Conditions</p>
+        <p class="text-4xl font-bold text-red-600">{{ diseases|length }}</p>
+    </div>
+
+    <div class="bg-blue-50 rounded-xl p-6 border-l-4 border-blue-600 shadow-lg hover:shadow-xl transition">
+        <p class="text-blue-700 font-bold mb-2">💊 Medicines</p>
+        <p class="text-4xl font-bold text-blue-600">{{ medicines|length }}</p>
+    </div>
+
+    <div class="bg-orange-50 rounded-xl p-6 border-l-4 border-orange-600 shadow-lg hover:shadow-xl transition">
+        <p class="text-orange-700 font-bold mb-2">🚨 Allergies</p>
+        <p class="text-4xl font-bold text-orange-600">{{ allergies|length }}</p>
+    </div>
+</div>
+
+<!-- Foods Compatibility Grid -->
+<div class="space-y-6">
+    {% regroup food_status.items by 1.avoid as food_groups %}
+    
+    {% for group in food_groups %}
+        {% if group.grouper %}
+            <!-- AVOID Foods -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition">
+                <div class="bg-gradient-to-r from-red-600 to-pink-600 p-6 text-white">
+                    <h3 class="text-2xl font-bold flex items-center gap-2">
+                        <i class="fas fa-ban"></i> ❌ Foods to COMPLETELY AVOID ({{ group.list|length }})
+                    </h3>
+                    <p class="text-red-100 text-sm mt-2">These foods may cause serious interactions</p>
+                </div>
+
+                <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for food, status in group.list %}
+                        <div class="bg-red-50 p-4 rounded-lg border-2 border-red-300 hover:border-red-500 transition">
+                            <p class="font-bold text-red-700 text-lg">{{ food.name }}</p>
+                            <p class="text-xs text-gray-600 mt-1">{{ food.get_category_display }}</p>
+                            
+                            <div class="mt-3 space-y-1 text-xs">
+                                {% for warning in status.warnings %}
+                                    <p class="text-red-600 font-semibold">{{ warning }}</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% else %}
+            <!-- SAFE/WARNING Foods -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition">
+                <div class="bg-gradient-to-r from-green-600 to-emerald-600 p-6 text-white">
+                    <h3 class="text-2xl font-bold flex items-center gap-2">
+                        <i class="fas fa-check-circle"></i> ✅ Safe Foods ({{ group.list|length }})
+                    </h3>
+                    <p class="text-green-100 text-sm mt-2">These foods are compatible with your profile</p>
+                </div>
+
+                <div class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {% for food, status in group.list %}
+                        <div class="bg-green-50 p-4 rounded-lg border-2 border-green-300 hover:border-green-500 transition">
+                            <p class="font-bold text-green-700">{{ food.name }}</p>
+                            <p class="text-xs text-gray-600">{{ food.get_category_display }}</p>
+                            
+                            {% if status.warnings %}
+                                <div class="mt-2 space-y-1 text-xs">
+                                    {% for warning in status.warnings %}
+                                        <p class="text-yellow-600 font-semibold">{{ warning }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <p class="text-xs text-green-600 mt-2 font-semibold">✓ No restrictions</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<!-- Summary -->
+<div class="mt-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-8 border-l-4 border-blue-600 shadow-lg">
+    <h3 class="text-2xl font-bold text-gray-800 mb-4">
+        <i class="fas fa-info-circle text-blue-600 mr-2"></i>Summary
+    </h3>
+    
+    <ul class="space-y-3 text-gray-700">
+        <li class="flex gap-3">
+            <i class="fas fa-check text-green-600 mt-1 flex-shrink-0"></i>
+            <span>{{ diseases|length }} health condition{{ diseases|length|pluralize }} identified</span>
+        </li>
+        <li class="flex gap-3">
+            <i class="fas fa-check text-green-600 mt-1 flex-shrink-0"></i>
+            <span>{{ medicines|length }} medicine{{ medicines|length|pluralize }} in your profile</span>
+        </li>
+        <li class="flex gap-3">
+            <i class="fas fa-check text-green-600 mt-1 flex-shrink-0"></i>
+            <span>{{ allergies|length }} food allergy{{ allergies|length|pluralize }}</span>
+        </li>
+        <li class="flex gap-3">
+            <i class="fas fa-lightbulb text-yellow-600 mt-1 flex-shrink-0"></i>
+            <span>Always consult your doctor before making major dietary changes</span>
+        </li>
+    </ul>
+</div>
+
+{% endblock %}
