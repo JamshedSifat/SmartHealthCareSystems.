@@ -71,6 +71,8 @@ def get_bmi_health_advice(bmi):
         return "Obesity detected. Please consult a healthcare provider."
 
 
+
+
 # ===== CALORIE CALCULATION =====
 
 def calculate_daily_calorie_requirement(age, weight, height, gender, activity_level):
