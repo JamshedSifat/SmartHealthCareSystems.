@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Emergency Blood & Hospital Finder{% endblock %}
+
+{% block extra-styles %}
+    <script src="https://cdn.tailwindcss.com"></script>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100 text-black">
+
+    <!-- Header Section -->
+    <div class="bg-red-600 text-white py-6 text-center">
+        <h1 class="text-3xl font-bold mb-2">🚨 Emergency Blood & Hospital Finder</h1>
+        <p class="text-sm">Find available blood samples and hospitals near you</p>
+    </div>
+
+    <!-- Search Section -->
+    <div class="max-w-md mx-auto mt-8 bg-white p-6 rounded shadow">
+        <form action="{% url 'appointments:blood_search' %}" method="get">
+            <label for="search-input" class="block text-gray-700 font-semibold mb-2">Search</label>
+            <input
+                type="text"
+                id="search-input"
+                name="q"
+                placeholder="Enter blood type or hospital name"
+                value="{{ request.GET.q|default:'' }}"
+                class="w-full border border-gray-300 rounded px-3 py-2 mb-4 focus:border-red-500 outline-none"
+            >
+            <button
+                type="submit"
+                class="w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 transition"
+            >
+                🔍 Search
+            </button>
+        </form>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="max-w-3xl mx-auto mt-6 px-4">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded relative mb-2">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Results Section -->
+<div class="max-w-4xl mx-auto mt-10 px-4">
+    {% if hospitals %}
+        <!-- Results Header with Stats -->
+        <!-- <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-6 mb-8 text-white shadow-lg">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold flex items-center gap-2">
+                        <i class="fas fa-check-circle"></i> Search Results
+                    </h2>
+                    <p class="text-green-100 mt-1">Found matching hospitals in your area</p>
+                </div>
+                <div class="bg-white/20 backdrop-blur-sm rounded-lg px-6 py-3 text-center">
+                    <div class="text-3xl font-bold">{{ hospitals|length }}</div>
+                    <div class="text-sm text-green-100">Hospital{{ hospitals|length|pluralize }}</div>
+                </div>
+            </div>
+        </div> -->
+
+        <!-- Results Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {% for hospital in hospitals %}
+            <!-- Hospital Card -->
+            <div class="group bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 hover:border-green-200">
+                <!-- Card Header -->
+                <div class="bg-gradient-to-r from-purple-600 to-indigo-600 p-5 text-white">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold flex items-center gap-2">
+                                <i class="fas fa-hospital-user"></i> 
+                                {{ hospital.hospital_name }}
+                            </h3>
+                            <div class="flex items-center gap-3 mt-2 text-purple-100 text-sm">
+                                <span class="flex items-center gap-1">
+                                    <i class="fas fa-map-marker-alt"></i> {{ hospital.location }}
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <i class="fas fa-users"></i> Capacity: {{ hospital.capacity }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="bg-white/20 rounded-lg px-3 py-1 text-sm font-semibold">
+                            <i class="fas fa-star"></i> Verified
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Body -->
+                <div class="p-5">
+                    {% if hospital.blood_samples.all %}
+                        <!-- Blood Samples Section -->
+                        <div class="mb-4">
+                            <h4 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-2">
+                                <i class="fas fa-tint text-red-500"></i> Available Blood Samples
+                                <span class="bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full">
+                                    {{ hospital.blood_samples.all|length }} types
+                                </span>
+                            </h4>
+                            <div class="space-y-2">
+                                {% for blood in hospital.blood_samples.all %}
+                                    <div class="bg-gradient-to-r from-gray-50 to-white rounded-lg p-3 border-l-4 border-red-500 hover:shadow-md transition">
+                                        <div class="flex justify-between items-center flex-wrap gap-2">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                                    <span class="text-red-600 font-bold text-sm">{{ blood.blood_group }}</span>
+                                                </div>
+                                                <div>
+                                                    <span class="font-semibold text-gray-800">{{ blood.blood_group }}</span>
+                                                    <p class="text-xs text-gray-500">
+                                                        <i class="fas fa-box"></i> {{ blood.quantity }} bag{{ blood.quantity|pluralize }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="text-xs text-gray-500 flex items-center gap-1">
+                                                    <i class="fas fa-calendar-alt"></i> Expires: 
+                                                    <span class="{% if blood.expiry_date|date:'Y-m-d' <= today|date:'Y-m-d' %}text-red-600 font-semibold{% else %}text-gray-700{% endif %}">
+                                                        {{ blood.expiry_date|date:"M d, Y" }}
+                                                    </span>
+                                                </span>
+                                                {% if blood.quantity > 0 %}
+                                                    <span class="inline-block mt-1 bg-green-100 text-green-600 text-xs px-2 py-0.5 rounded-full">
+                                                        <i class="fas fa-check-circle"></i> Available
+                                                    </span>
+                                                {% else %}
+                                                    <span class="inline-block mt-1 bg-red-100 text-red-600 text-xs px-2 py-0.5 rounded-full">
+                                                        <i class="fas fa-times-circle"></i> Out of Stock
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <!-- <div class="flex gap-3 mt-4 pt-3 border-t border-gray-100">
+                            <a href="#" class="flex-1 text-center bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all text-sm font-semibold shadow-md hover:shadow-lg">
+                                <i class="fas fa-phone-alt"></i> Contact
+                            </a>
+                            <a href="#" class="flex-1 text-center bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all text-sm font-semibold shadow-md hover:shadow-lg">
+                                <i class="fas fa-directions"></i> Get Directions
+                            </a>
+                        </div> -->
+                    {% else %}
+                        <!-- No Blood Samples -->
+                        <div class="text-center py-8 bg-gray-50 rounded-lg">
+                            <i class="fas fa-tint-slash text-4xl text-gray-300 mb-2 block"></i>
+                            <p class="text-yellow-600 font-medium">No blood samples currently available</p>
+                            <p class="text-xs text-gray-500 mt-1">Check back later or contact the hospital directly</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Card Footer with Quick Info -->
+                <div class="bg-gray-50 px-5 py-3 border-t border-gray-100">
+                    <div class="flex flex-wrap justify-between gap-2 text-xs text-gray-600">
+                        <span class="flex items-center gap-1">
+                            <i class="fas fa-clock text-green-600"></i> 24/7 Emergency
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <i class="fas fa-flask text-purple-600"></i> Lab Services
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <i class="fas fa-ambulance text-red-600"></i> Ambulance
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    {% else %}
+        <!-- No Results Found -->
+        <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-12 text-center shadow-lg border border-gray-200">
+            <div class="w-24 h-24 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-hospital text-4xl text-red-400"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-3">No Hospitals Found</h2>
+            {% if request.GET.q %}
+                <p class="text-gray-600 mb-4">
+                    No results for "<strong class="text-purple-600">{{ request.GET.q }}</strong>"
+                </p>
+            {% endif %}
+            <p class="text-gray-500 mb-6">Try searching by blood type or hospital name</p>
+            <div class="flex gap-3 justify-center flex-wrap">
+                <span class="inline-flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-lg text-sm">
+                    <i class="fas fa-tint"></i> A+, A-, B+, B-, O+, O-, AB+, AB-
+                </span>
+            </div>
+            <div class="mt-6">
+                <a href="#" class="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 font-semibold">
+                    <i class="fas fa-search"></i> Try a different search
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+    <!-- Emergency Notice -->
+    <div class="bg-red-600 text-white text-center py-4 mt-10">
+        <p class="font-bold">
+            🚨 Emergency? Call <span class="text-yellow-300">911</span> immediately!
+        </p>
+        <p class="text-sm">This is a search tool only — not a live emergency response system.</p>
+    </div>
+</div>
+{% endblock %}
