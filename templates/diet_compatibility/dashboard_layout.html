@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="flex bg-gray-50 min-h-screen">
+    
+    <!-- Left Sidebar Navigation -->
+    {% include 'diet_compatibility/includes/sidebar.html' %}
+
+    <!-- Main Content Area -->
+    <div class="flex-1 overflow-x-hidden">
+        <!-- Mobile Sidebar Toggle Button (visible only on mobile) -->
+        <div class="lg:hidden bg-white shadow-md p-4 sticky top-16 z-30">
+            <button id="toggle-sidebar" class="text-gray-700 hover:text-purple-600 font-bold">
+                <i class="fas fa-bars text-xl"></i> Menu
+            </button>
+        </div>
+
+        <!-- Page Content -->
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {% block dashboard_content %}
+                <!-- Page content goes here -->
+            {% endblock %}
+        </div>
+    </div>
+
+</div>
+
+<style>
+    /* Mobile Sidebar Responsive */
+    @media (max-width: 1024px) {
+        .w-64 {
+            position: fixed;
+            left: -256px;
+            transition: left 0.3s ease;
+            z-index: 40;
+            height: 100vh;
+            top: 64px;
+        }
+
+        .w-64.active {
+            left: 0;
+        }
+
+        .flex-1 {
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleBtn = document.getElementById('toggle-sidebar');
+        const sidebar = document.querySelector('.w-64');
+
+        if (toggleBtn && sidebar) {
+            toggleBtn.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+            });
+
+            // Close sidebar when clicking on a link
+            const sidebarLinks = sidebar.querySelectorAll('a');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    sidebar.classList.remove('active');
+                });
+            });
+
+            // Close sidebar when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!sidebar.contains(event.target) && !toggleBtn.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        }
+    });
+</script>
+
+{% endblock %}
