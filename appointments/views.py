@@ -547,4 +547,42 @@ def medicine_reminder(request):
         'current_date': timezone.now()
     })
 
+# ============ Emergency Views ============
 
+def emergency(request):
+    """Emergency services"""
+    hospitals = Hospital.objects.all()
+    return render(request, "appointments/emergency.html", {
+        'hospitals': hospitals,
+        'search_query': ''
+    })
+
+
+def blood_search(request):
+    """Search for blood"""
+    query = request.GET.get('q', '')
+    hospitals = Hospital.objects.all()
+
+    if query:
+        hospitals = hospitals.filter(
+            Q(hospital_name__icontains=query) |
+            Q(location__icontains=query) |
+            Q(blood_samples__blood_group__iexact=query)
+        )
+        hospitals = hospitals.distinct()
+    else:
+        messages.error(request, "Search bar was empty")
+        return redirect('appointments:emergency')
+
+    if not hospitals:
+        messages.error(request, "No hospitals found.")
+        return redirect('appointments:emergency')
+
+    return render(request, 'appointments/emergency.html', {
+        'hospitals': hospitals,
+        'search_query': query
+    })
+
+
+@login_required
+def doctor_appointments(request):
