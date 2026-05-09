@@ -1,0 +1,134 @@
+{% extends 'diet_compatibility/dashboard_layout.html' %}
+{% load static %}
+
+{% block title %}Disease Diet Guide{% endblock %}
+
+{% block dashboard_content %}
+
+<!-- Page Header -->
+<div class="mb-8">
+    <h1 class="text-4xl font-bold text-gray-800 mb-2">
+        <i class="fas fa-apple-alt text-green-600"></i> Disease-Based Diet Guide
+    </h1>
+    <p class="text-gray-600">Get personalized food recommendations based on your health conditions</p>
+</div>
+
+<!-- Disease Selector -->
+<div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+    <form method="get" class="flex gap-3 flex-wrap">
+        <select name="disease" class="flex-1 min-w-64 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600">
+            <option value="">Select a Condition</option>
+            {% for disease in diseases %}
+                <option value="{{ disease.id }}" {% if disease.id|stringformat:"s" == request.GET.disease %}selected{% endif %}>
+                    {{ disease.name }}
+                </option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-bold transition flex items-center gap-2">
+            <i class="fas fa-search"></i> Show Diet
+        </button>
+    </form>
+</div>
+
+{% if disease_obj %}
+    <!-- Disease Info -->
+    <div class="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-8 mb-8 border-l-4 border-red-600 shadow-lg">
+        <h2 class="text-3xl font-bold text-gray-800 mb-3">{{ disease_obj.name }}</h2>
+        <p class="text-gray-700 mb-4 leading-relaxed">{{ disease_obj.description }}</p>
+        
+        <div class="inline-block">
+            <span class="text-sm font-bold text-gray-800">Severity Level:</span>
+            <span class="ml-2 px-4 py-1 rounded-full font-bold {% if disease_obj.severity_level == 'severe' %}bg-red-200 text-red-700{% elif disease_obj.severity_level == 'moderate' %}bg-yellow-200 text-yellow-700{% else %}bg-green-200 text-green-700{% endif %}">
+                {{ disease_obj.get_severity_level_display }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Diet Recommendations -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Recommended Foods -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition">
+            <div class="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white">
+                <h3 class="text-2xl font-bold flex items-center gap-2">
+                    <i class="fas fa-check-circle"></i> Recommended Foods
+                </h3>
+                <p class="text-green-100 text-sm mt-1">{{ recommended_foods|length }} items</p>
+            </div>
+
+            <div class="p-6 space-y-3 max-h-96 overflow-y-auto">
+                {% for item in recommended_foods %}
+                    <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-600">
+                        <p class="font-bold text-gray-800">{{ item.food.name }}</p>
+                        <p class="text-xs text-gray-600 mt-1">{{ item.food.calories_per_100g }} kcal/100g</p>
+                        <p class="text-xs text-gray-700 mt-2">{{ item.reason }}</p>
+                    </div>
+                {% empty %}
+                    <p class="text-gray-500 text-center py-8">No recommended foods</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Limited Foods -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition">
+            <div class="bg-gradient-to-r from-yellow-500 to-orange-600 p-6 text-white">
+                <h3 class="text-2xl font-bold flex items-center gap-2">
+                    <i class="fas fa-exclamation-circle"></i> Limited Quantity
+                </h3>
+                <p class="text-yellow-100 text-sm mt-1">{{ limited_foods|length }} items</p>
+            </div>
+
+            <div class="p-6 space-y-3 max-h-96 overflow-y-auto">
+                {% for item in limited_foods %}
+                    <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-600">
+                        <p class="font-bold text-gray-800">{{ item.food.name }}</p>
+                        <p class="text-xs text-gray-600 mt-1">{{ item.quantity_limit }}</p>
+                        <p class="text-xs text-gray-700 mt-2">{{ item.reason }}</p>
+                    </div>
+                {% empty %}
+                    <p class="text-gray-500 text-center py-8">No limited foods</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Avoid Foods -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition">
+            <div class="bg-gradient-to-r from-red-500 to-pink-600 p-6 text-white">
+                <h3 class="text-2xl font-bold flex items-center gap-2">
+                    <i class="fas fa-times-circle"></i> Foods to Avoid
+                </h3>
+                <p class="text-red-100 text-sm mt-1">{{ avoid_foods|length }} items</p>
+            </div>
+
+            <div class="p-6 space-y-3 max-h-96 overflow-y-auto">
+                {% for item in avoid_foods %}
+                    <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-600">
+                        <p class="font-bold text-gray-800">{{ item.food.name }}</p>
+                        <p class="text-xs text-gray-600 mt-1">{{ item.food.category }}</p>
+                        <p class="text-xs text-gray-700 mt-2">{{ item.reason }}</p>
+                    </div>
+                {% empty %}
+                    <p class="text-gray-500 text-center py-8">No foods to avoid</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="mt-8 flex gap-4 flex-wrap">
+        <a href="{% url 'diet_compatibility:create_meal' %}"
+           class="flex-1 min-w-64 text-center bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white py-3 rounded-lg font-bold transition shadow-lg flex items-center justify-center gap-2">
+            <i class="fas fa-utensils"></i>Plan Meal Based on This Diet
+        </a>
+    </div>
+
+{% else %}
+    <!-- Empty State -->
+    <div class="text-center py-16 bg-white rounded-xl shadow-lg">
+        <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">Select a Condition</h2>
+        <p class="text-gray-600">Choose a health condition from the dropdown above to see personalized diet recommendations</p>
+    </div>
+{% endif %}
+
+{% endblock %}
