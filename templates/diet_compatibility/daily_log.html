@@ -1,0 +1,177 @@
+{% extends 'diet_compatibility/dashboard_layout.html' %}
+{% load static %}
+
+{% block title %}Daily Log{% endblock %}
+
+{% block dashboard_content %}
+
+<!-- Page Header -->
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">
+        <i class="fas fa-clipboard-list mr-2"></i>Daily Health Log
+    </h1>
+    <p class="text-gray-600">Track your water intake and daily notes</p>
+</div>
+
+<!-- Main Form Card -->
+<div class="bg-white rounded-xl shadow-lg overflow-hidden">
+    
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-cyan-600 p-8 text-white">
+        <h2 class="text-2xl font-bold">Today's Log - {{ current_date }}</h2>
+        <p class="text-blue-100 mt-1">Keep track of your daily health metrics</p>
+    </div>
+
+    <!-- Form Content -->
+    <form method="post" action="{% url 'diet_compatibility:update_daily_log' %}" class="p-8 space-y-8">
+        {% csrf_token %}
+
+        <!-- Water Intake Section -->
+        <div>
+            <label class="block text-2xl font-bold text-gray-800 mb-6">
+                <i class="fas fa-water text-blue-600 mr-2"></i>Water Intake Today
+            </label>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <!-- Input & Controls -->
+                <div>
+                    <div class="flex gap-3 mb-6">
+                        <div class="flex-1">
+                            <label class="text-sm font-bold text-gray-700 block mb-2">Milliliters (ml)</label>
+                            <input type="number" name="water_intake" min="0" step="100"
+                                   value="{{ daily_log.water_intake_ml|default:0 }}"
+                                   id="waterInput"
+                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-lg font-bold">
+                        </div>
+                        <div class="flex items-end">
+                            <button type="button" onclick="addWater(250)"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold transition">
+                                +250ml
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Amount Buttons -->
+                    <label class="text-sm font-bold text-gray-700 block mb-3">Quick Set:</label>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" onclick="setWater(500)" 
+                                class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-full text-sm font-semibold transition">
+                            500ml
+                        </button>
+                        <button type="button" onclick="setWater(750)" 
+                                class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-full text-sm font-semibold transition">
+                            750ml
+                        </button>
+                        <button type="button" onclick="setWater(1000)" 
+                                class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-full text-sm font-semibold transition">
+                            1L
+                        </button>
+                        <button type="button" onclick="setWater(1500)" 
+                                class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-full text-sm font-semibold transition">
+                            1.5L
+                        </button>
+                        <button type="button" onclick="setWater(2000)" 
+                                class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-full text-sm font-semibold transition">
+                            2L
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Progress Display -->
+                <div>
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-sm font-bold text-gray-700 mb-3">Daily Goal: 2000ml</p>
+                            <div class="bg-gray-200 rounded-full h-6 overflow-hidden mb-3">
+                                <div id="waterProgress" class="bg-gradient-to-r from-blue-500 to-cyan-500 h-full rounded-full transition-all" style="width: 0%;"></div>
+                            </div>
+                            <p id="waterPercent" class="text-center font-bold text-blue-600 text-lg">0%</p>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="bg-blue-50 p-4 rounded-lg text-center border-2 border-blue-200">
+                                <p class="text-xs text-gray-600 font-semibold">Glasses</p>
+                                <p id="glassCount" class="text-3xl font-bold text-blue-600 mt-1">0</p>
+                                <p class="text-xs text-gray-600">(8oz each)</p>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-lg text-center border-2 border-blue-200">
+                                <p class="text-xs text-gray-600 font-semibold">Cups</p>
+                                <p id="cupCount" class="text-3xl font-bold text-blue-600 mt-1">0</p>
+                                <p class="text-xs text-gray-600">(250ml each)</p>
+                            </div>
+                            <div class="bg-blue-50 p-4 rounded-lg text-center border-2 border-blue-200">
+                                <p class="text-xs text-gray-600 font-semibold">Bottles</p>
+                                <p id="bottleCount" class="text-3xl font-bold text-blue-600 mt-1">0</p>
+                                <p class="text-xs text-gray-600">(500ml each)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <hr class="border-gray-300">
+
+        <!-- Daily Notes Section -->
+        <div>
+            <label class="block text-2xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-sticky-note text-yellow-600 mr-2"></i>Daily Notes
+            </label>
+
+            <textarea name="notes" rows="5"
+                      placeholder="How are you feeling today? Any symptoms? Any observations about your diet?"
+                      class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-600 resize-none">{{ daily_log.notes|default:'' }}</textarea>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-3 pt-6 border-t">
+            <button type="submit" class="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white py-3 rounded-lg font-bold transition shadow-lg flex items-center justify-center gap-2">
+                <i class="fas fa-save"></i>Save Log
+            </button>
+            <a href="{% url 'diet_compatibility:health_profile_dashboard' %}"
+               class="flex-1 text-center bg-gray-300 hover:bg-gray-400 text-gray-800 py-3 rounded-lg font-bold transition flex items-center justify-center gap-2">
+                <i class="fas fa-arrow-left"></i>Back
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+    const waterInput = document.querySelector('input[name="water_intake"]');
+    const waterProgress = document.getElementById('waterProgress');
+    const waterPercent = document.getElementById('waterPercent');
+    const glassCount = document.getElementById('glassCount');
+    const cupCount = document.getElementById('cupCount');
+    const bottleCount = document.getElementById('bottleCount');
+
+    function updateWaterDisplay() {
+        const amount = parseInt(waterInput.value) || 0;
+        const percent = Math.min((amount / 2000) * 100, 100);
+        
+        waterProgress.style.width = percent + '%';
+        waterPercent.textContent = Math.round(percent) + '%';
+        glassCount.textContent = Math.round(amount / 237);
+        cupCount.textContent = Math.round(amount / 250);
+        bottleCount.textContent = Math.round(amount / 500);
+    }
+
+    function addWater(amount) {
+        waterInput.value = (parseInt(waterInput.value) || 0) + amount;
+        updateWaterDisplay();
+    }
+
+    function setWater(amount) {
+        waterInput.value = amount;
+        updateWaterDisplay();
+    }
+
+    waterInput.addEventListener('change', updateWaterDisplay);
+    waterInput.addEventListener('keyup', updateWaterDisplay);
+    
+    // Initial update
+    updateWaterDisplay();
+</script>
+
+{% endblock %}
