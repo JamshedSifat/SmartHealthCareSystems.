@@ -1,0 +1,136 @@
+{% extends 'diet_compatibility/dashboard_layout.html' %}
+{% load static %}
+
+{% block title %}Calorie Counter{% endblock %}
+
+{% block dashboard_content %}
+
+<!-- Page Header -->
+<div class="mb-8">
+    <h1 class="text-4xl font-bold text-gray-800 mb-2">
+        <i class="fas fa-fire text-orange-600"></i> Calorie Counter
+    </h1>
+    <p class="text-gray-600">Track your daily calorie intake and manage your diet</p>
+</div>
+
+<!-- Main Stats -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    
+    <!-- Total Intake -->
+    <div class="bg-gradient-to-br from-orange-500 to-red-600 text-white rounded-xl p-8 shadow-lg">
+        <p class="text-sm opacity-90 mb-2"><i class="fas fa-fire mr-2"></i>Today's Intake</p>
+        <p class="text-5xl font-bold">{{ total_calories }}</p>
+        <p class="text-sm mt-3 opacity-90">calories consumed</p>
+    </div>
+
+    <!-- Daily Goal -->
+    <div class="bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-xl p-8 shadow-lg">
+        <p class="text-sm opacity-90 mb-2"><i class="fas fa-target mr-2"></i>Daily Goal</p>
+        <p class="text-5xl font-bold">{{ daily_need }}</p>
+        <p class="text-sm mt-3 opacity-90">calories needed</p>
+    </div>
+
+    <!-- Remaining -->
+    <div class="{% if remaining > 0 %}bg-gradient-to-br from-blue-500 to-cyan-600{% else %}bg-gradient-to-br from-red-500 to-pink-600{% endif %} text-white rounded-xl p-8 shadow-lg">
+        <p class="text-sm opacity-90 mb-2"><i class="fas fa-balance-scale mr-2"></i>Remaining</p>
+        <p class="text-5xl font-bold">{{ remaining }}</p>
+        <p class="text-sm mt-3 opacity-90">{% if remaining > 0 %}you can eat{% else %}over goal{% endif %}</p>
+    </div>
+</div>
+
+<!-- Progress Bar -->
+<div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-6">Daily Progress</h3>
+    
+    <div class="mb-4">
+        <div class="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
+            <div class="bg-gradient-to-r from-orange-500 to-red-600 h-full rounded-full transition-all flex items-center justify-center text-white font-bold text-sm"
+                 style="width: {% widthratio total_calories daily_need 100 %}%;">
+                {% if daily_need > 0 %}{% widthratio total_calories daily_need 100 %}%{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <p class="text-gray-600">
+        You've consumed <strong>{{ total_calories }}</strong> out of <strong>{{ daily_need }}</strong> recommended calories.
+    </p>
+</div>
+
+<!-- Meals Breakdown -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    
+    <!-- By Meal Type -->
+    <div class="bg-white rounded-xl shadow-lg p-8">
+        <h3 class="text-2xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-chart-pie text-purple-600 mr-2"></i>Breakdown by Meal
+        </h3>
+
+        {% if calories_by_meal %}
+            <div class="space-y-4">
+                {% for meal_type, calories in calories_by_meal.items %}
+                    <div class="border-l-4 border-purple-600 bg-gray-50 p-4 rounded-lg hover:bg-gray-100 transition">
+                        <div class="flex justify-between items-center mb-2">
+                            <p class="font-bold text-gray-800">{{ meal_type }}</p>
+                            <p class="font-bold text-purple-600">{{ calories|floatformat:0 }} kcal</p>
+                        </div>
+                        
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full transition-all"
+                                 style="width: {% widthratio calories daily_need 100 %}%;"></div>
+                        </div>
+                        
+                        <p class="text-xs text-gray-600 mt-2">
+                            {% widthratio calories daily_need 100 %}% of daily goal
+                        </p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500 text-center py-8">No meals logged yet. Add meals to see breakdown.</p>
+        {% endif %}
+    </div>
+
+    <!-- Tips -->
+    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-lg p-8 border-l-4 border-blue-600">
+        <h3 class="text-2xl font-bold text-gray-800 mb-6">
+            <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>Calorie Tips
+        </h3>
+
+        <ul class="space-y-4 text-sm text-gray-700">
+            <li class="flex gap-3">
+                <i class="fas fa-check text-green-600 mt-1 flex-shrink-0"></i>
+                <span><strong>Eat slowly:</strong> It takes 20 minutes to feel full</span>
+            </li>
+            <li class="flex gap-3">
+                <i class="fas fa-check text-green-600 mt-1 flex-shrink-0"></i>
+                <span><strong>Stay hydrated:</strong> Drink water before meals</span>
+            </li>
+            <li class="flex gap-3">
+                <i class="fas fa-check text-green-600 mt-1 flex-shrink-0"></i>
+                <span><strong>Protein matters:</strong> Include lean protein at each meal</span>
+            </li>
+            <li class="flex gap-3">
+                <i class="fas fa-check text-green-600 mt-1 flex-shrink-0"></i>
+                <span><strong>Fiber helps:</strong> Vegetables keep you full longer</span>
+            </li>
+            <li class="flex gap-3">
+                <i class="fas fa-check text-green-600 mt-1 flex-shrink-0"></i>
+                <span><strong>Track everything:</strong> Even small snacks add up</span>
+            </li>
+            <li class="flex gap-3">
+                <i class="fas fa-check text-green-600 mt-1 flex-shrink-0"></i>
+                <span><strong>Balance macros:</strong> Carbs, protein, and fats matter</span>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Action Button -->
+<div class="mt-8 text-center">
+    <a href="{% url 'diet_compatibility:create_meal' %}"
+       class="inline-block bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white px-8 py-4 rounded-lg font-bold text-lg transition shadow-lg">
+        <i class="fas fa-plus mr-2"></i>Add Another Meal
+    </a>
+</div>
+
+{% endblock %}
