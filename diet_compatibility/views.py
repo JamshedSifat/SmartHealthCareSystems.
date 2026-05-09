@@ -10,7 +10,67 @@ from .models import (
     Disease, Food, DiseaseFood, Medicine, MedicineFoodCompatibility,
     HealthProfile, MealPlan, MealFood, DailyLog, Allergy
 )
-
+# ============ DASHBOARD ============
+@login_required
+def health_dashboard(request):
+    """Main health dashboard"""
+    
+    # ✅ FIX: Check if profile exists, if not create one
+    profile, created = HealthProfile.objects.get_or_create(user=request.user)
+    
+    if created:
+        # Set default values
+        profile.age = 25
+        profile.height = 170.0
+        profile.weight = 70.0
+        profile.gender = 'male'
+        profile.activity_level = 'moderate'
+        profile.save()
+        messages.info(request, "Please complete your health profile!")
+        return redirect('diet_compatibility:create_health_profile')
+    
+    today = timezone.now().date()
+    daily_log, _ = DailyLog.objects.get_or_create(user=request.user, date=today)
+    
+    # Today's meals
+    today_meals = MealPlan.objects.filter(user=request.user, date=today)
+    today_calories = sum(meal.get_total_calories() for meal in today_meals)
+    
+    # Health stats
+    bmi = profile.calculate_bmi()
+    bmi_category = profile.get_bmi_category()
+    daily_calorie_need = profile.calculate_daily_calorie_need()
+    water_goal = 2000  # ml
+    
+    # Recommendations
+    diseases = profile.diseases.all()
+    medicines = profile.medicines.all()
+    
+    # User allergies
+    try:
+        allergies = request.user.allergy_profile.foods.all()
+    except:
+        allergies = []
+    
+    # Format today's date
+    today_date = today.strftime("%A, %B %d, %Y")
+    
+    context = {
+        'profile': profile,
+        'bmi': bmi,
+        'bmi_category': bmi_category,
+        'daily_calorie_need': daily_calorie_need,
+        'today_calories': today_calories,
+        'water_intake': daily_log.water_intake_ml,
+        'water_goal': water_goal,
+        'today_meals': today_meals,
+        'diseases': diseases,
+        'medicines': medicines,
+        'allergies': allergies,
+        'today_date': today_date,
+    }
+    
+    return render(request, 'diet_compatibility/dashboard.html', context)
 
 # ============ DISEASE DIET ============
 @login_required
