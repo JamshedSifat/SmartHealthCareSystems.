@@ -10,6 +10,62 @@ from .models import (
     Disease, Food, DiseaseFood, Medicine, MedicineFoodCompatibility,
     HealthProfile, MealPlan, MealFood, DailyLog, Allergy
 )
+
+
+# ============ HEALTH PROFILE ============
+@login_required
+def create_health_profile(request):
+    """Create health profile"""
+    try:
+        profile = request.user.health_profile
+    except HealthProfile.DoesNotExist:
+        profile = None
+    
+    if request.method == 'POST':
+        if not profile:
+            profile = HealthProfile.objects.create(user=request.user)
+        
+        profile.age = int(request.POST.get('age', 25))
+        profile.height = float(request.POST.get('height', 170))
+        profile.weight = float(request.POST.get('weight', 70))
+        profile.gender = request.POST.get('gender', 'male')
+        profile.blood_group = request.POST.get('blood_group', '')
+        profile.activity_level = request.POST.get('activity_level', 'moderate')
+        profile.save()
+        
+        # Add diseases
+        disease_ids = request.POST.getlist('diseases')
+        profile.diseases.set(disease_ids)
+        
+        # Add medicines
+        medicine_ids = request.POST.getlist('medicines')
+        profile.medicines.set(medicine_ids)
+        
+        # Create Allergy profile if not exists
+        Allergy.objects.get_or_create(user=request.user)
+        
+        messages.success(request, "Health profile created/updated successfully!")
+        return redirect('diet_compatibility:health_profile_dashboard')
+    
+    diseases = Disease.objects.all()
+    medicines = Medicine.objects.all()
+    
+    context = {
+        'profile': profile,
+        'diseases': diseases,
+        'medicines': medicines,
+    }
+    
+    return render(request, 'diet_compatibility/create_health_profile.html', context)
+
+
+@login_required
+def edit_health_profile(request):
+    """Edit health profile"""
+    return create_health_profile(request)
+
+
+
 # ============ DASHBOARD ============
 @login_required
 def health_dashboard(request):
