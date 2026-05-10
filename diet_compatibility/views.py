@@ -127,6 +127,37 @@ def health_dashboard(request):
     }
     
     return render(request, 'diet_compatibility/dashboard.html', context)
+    
+# ============ CALORIE COUNTER ============
+@login_required
+def calorie_counter(request):
+    """Calorie counter"""
+    today = timezone.now().date()
+    meals = MealPlan.objects.filter(user=request.user, date=today)
+    
+    calories_by_meal = {}
+    total_calories = 0
+    
+    for meal in meals:
+        meal_calories = meal.get_total_calories()
+        meal_type = dict(MealPlan.MEAL_TYPE_CHOICES).get(meal.meal_type, meal.meal_type)
+        calories_by_meal[meal_type] = meal_calories
+        total_calories += meal_calories
+    
+    daily_need = 2000
+    try:
+        daily_need = request.user.health_profile.calculate_daily_calorie_need()
+    except:
+        pass
+    
+    context = {
+        'calories_by_meal': calories_by_meal,
+        'total_calories': total_calories,
+        'daily_need': daily_need,
+        'remaining': max(0, daily_need - total_calories),
+    }
+    
+    return render(request, 'diet_compatibility/calorie_counter.html', context)
 
 # ============ DISEASE DIET ============
 @login_required
