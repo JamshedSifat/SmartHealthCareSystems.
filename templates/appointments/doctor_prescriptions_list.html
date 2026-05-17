@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Prescriptions - Doctor{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-10 px-5">
+    <div class="bg-white shadow-xl rounded-2xl overflow-hidden">
+        <div class="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4">
+            <h1 class="text-2xl font-bold text-white">
+                <i class="fas fa-prescription-bottle-alt mr-2"></i> My Prescriptions
+            </h1>
+            <p class="text-purple-100 text-sm">All prescriptions you have created</p>
+        </div>
+        
+        <div class="p-6">
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-purple-100 rounded-lg p-4 text-center">
+                    <p class="text-2xl font-bold text-purple-600">{{ total_prescriptions }}</p>
+                    <p class="text-sm text-gray-600">Total Prescriptions</p>
+                </div>
+                <div class="bg-green-100 rounded-lg p-4 text-center">
+                    <p class="text-2xl font-bold text-green-600">{{ prescriptions|length }}</p>
+                    <p class="text-sm text-gray-600">Active</p>
+                </div>
+                <div class="bg-blue-100 rounded-lg p-4 text-center">
+                    <a href="{% url 'appointments:add_medicine' %}" class="text-blue-600 hover:text-blue-700">
+                        <i class="fas fa-pills text-2xl block mb-1"></i>
+                        <span class="text-sm">Manage Medicines</span>
+                    </a>
+                </div>
+            </div>
+            
+            {% if prescriptions %}
+                <div class="space-y-4">
+                    {% for prescription in prescriptions %}
+                    <div class="border rounded-lg p-4 hover:shadow-md transition bg-white">
+                        <div class="flex justify-between items-start flex-wrap gap-4">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-purple-600"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-gray-800">
+                                            {{ prescription.patient.get_full_name|default:prescription.patient.username }}
+                                        </h3>
+                                        <p class="text-xs text-gray-500">{{ prescription.patient.email }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="ml-12 space-y-1">
+                                    <p class="text-sm">
+                                        <span class="text-gray-500">Date:</span> 
+                                        {{ prescription.created_at|date:"M d, Y h:i A" }}
+                                    </p>
+                                    <p class="text-sm">
+                                        <span class="text-gray-500">Appointment Date:</span> 
+                                        {{ prescription.appointment.appointment_date|date:"M d, Y" }}
+                                    </p>
+                                    <p class="text-sm">
+                                        <span class="text-gray-500">Diagnosis:</span> 
+                                        {{ prescription.diagnosis|truncatechars:100 }}
+                                    </p>
+                                    <p class="text-sm">
+                                        <span class="text-gray-500">Medicines:</span> 
+                                        {{ prescription.medicines.count }} medicine(s)
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <a href="{% url 'appointments:view_prescription' prescription.id %}" 
+                                   class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm transition flex items-center gap-1">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                <a href="{% url 'appointments:edit_prescription' prescription.id %}" 
+                                   class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1.5 rounded-lg text-sm transition flex items-center gap-1">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a href="{% url 'appointments:download_prescription_pdf' prescription.id %}" 
+                                   class="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm transition flex items-center gap-1">
+                                    <i class="fas fa-download"></i> PDF
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-16">
+                    <div class="w-24 h-24 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-prescription-bottle text-4xl text-purple-500"></i>
+                    </div>
+                    <p class="text-gray-500 text-lg font-semibold">No Prescriptions Yet</p>
+                    <p class="text-gray-400 mt-2">You haven't created any prescriptions yet</p>
+                    <a href="{% url 'appointments:doctor_appointments' %}" 
+                       class="inline-block mt-4 bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition">
+                        <i class="fas fa-calendar-alt mr-1"></i> View Appointments
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
