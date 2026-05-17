@@ -1,0 +1,137 @@
+<!-- manage_time_slots.html - max_patients ফিল্ড যোগ করুন -->
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Time Slots{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto py-10 px-5">
+    <div class="bg-white shadow-xl rounded-2xl overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+            <h1 class="text-2xl font-bold text-white">
+                <i class="fas fa-clock mr-2"></i> Manage Time Slots
+            </h1>
+            <p class="text-blue-100 text-sm">Set your available consultation hours and patient capacity per slot</p>
+        </div>
+
+        <!-- Add Time Slot Form -->
+        <div class="p-6 border-b bg-gray-50">
+            <h2 class="text-lg font-bold text-gray-800 mb-4">
+                <i class="fas fa-plus-circle text-green-600 mr-2"></i> Add New Time Slot
+            </h2>
+            <form method="post" action="{% url 'appointments:add_time_slot' %}" class="grid grid-cols-1 md:grid-cols-6 gap-4">
+                {% csrf_token %}
+                <select name="day_of_week" required class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <option value="">Select Day</option>
+                    <option value="0">Monday</option>
+                    <option value="1">Tuesday</option>
+                    <option value="2">Wednesday</option>
+                    <option value="3">Thursday</option>
+                    <option value="4">Friday</option>
+                    <option value="5">Saturday</option>
+                    <option value="6">Sunday</option>
+                </select>
+                <input type="time" name="start_time" required class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                <input type="time" name="end_time" required class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
+                <input type="number" name="max_patients" value="10" min="1" max="50" required 
+                       class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                       placeholder="Max Patients">
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold transition col-span-2">
+                    <i class="fas fa-plus mr-1"></i> Add Slot
+                </button>
+            </form>
+            <p class="text-xs text-gray-500 mt-2">
+                <i class="fas fa-info-circle"></i> "Max Patients" = How many patients can book this specific time slot
+            </p>
+        </div>
+
+        <!-- Existing Time Slots -->
+        <div class="p-6">
+            <h2 class="text-lg font-bold text-gray-800 mb-4">
+                <i class="fas fa-list mr-2 text-blue-600"></i> Your Time Slots
+                <span class="text-sm text-gray-500 ml-2">({{ time_slots|length }} slots)</span>
+            </h2>
+            
+            {% if time_slots %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for slot in time_slots %}
+                    <div class="border rounded-lg p-4 hover:shadow-md transition bg-white">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="font-bold text-gray-800">{{ slot.get_day_of_week_display }}</span>
+                                    {% if slot.day_of_week == today_weekday %}
+                                        <span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">Today</span>
+                                    {% endif %}
+                                </div>
+                                <div class="flex items-center gap-2 text-gray-600 mb-2">
+                                    <i class="fas fa-hourglass-start text-blue-500"></i>
+                                    <span>{{ slot.start_time|time:"h:i A" }}</span>
+                                    <i class="fas fa-arrow-right text-gray-400"></i>
+                                    <i class="fas fa-hourglass-end text-blue-500"></i>
+                                    <span>{{ slot.end_time|time:"h:i A" }}</span>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-users text-green-500"></i>
+                                        <span class="text-sm">
+                                            <strong class="text-green-600">{{ slot.max_patients }}</strong> patients max
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-chart-line text-orange-500"></i>
+                                        <span class="text-sm text-gray-600">
+                                            Capacity: {{ slot.max_patients }} per slot
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <form method="post" action="{% url 'appointments:delete_time_slot' slot.id %}" onsubmit="return confirm('Delete this time slot?')">
+                                {% csrf_token %}
+                                <button type="submit" class="text-red-500 hover:text-red-700 transition">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-12 bg-gray-50 rounded-lg">
+                    <i class="fas fa-clock text-5xl text-gray-300 mb-3"></i>
+                    <p class="text-gray-500 font-medium">No time slots added yet</p>
+                    <p class="text-sm text-gray-400">Add your available consultation hours above</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Info Box -->
+        <div class="bg-blue-50 p-4 m-6 rounded-lg border-l-4 border-blue-500">
+            <p class="font-semibold text-blue-800 mb-2">
+                <i class="fas fa-info-circle mr-1"></i> How Time Slots Work
+            </p>
+            <ul class="text-sm text-blue-700 space-y-1">
+                <li>✓ Each time slot has a <strong>maximum patient limit</strong> (1-50 patients)</li>
+                <li>✓ Patients can see <strong>live availability</strong> (booked vs available spots)</li>
+                <li>✓ When a slot reaches its limit, it becomes <strong>automatically unavailable</strong></li>
+                <li>✓ You can add <strong>multiple slots</strong> for the same day (e.g., 10am-12pm and 4pm-6pm)</li>
+                <li>✓ Deleted slots won't affect <strong>existing appointments</strong></li>
+            </ul>
+        </div>
+        
+        <!-- Example Section -->
+        <div class="bg-green-50 p-4 m-6 rounded-lg border-l-4 border-green-500">
+            <p class="font-semibold text-green-800 mb-2">
+                <i class="fas fa-lightbulb mr-1"></i> Example
+            </p>
+            <p class="text-sm text-green-700">
+                If you set <strong>10 patients</strong> for the <strong>2:00 PM - 3:00 PM</strong> slot:<br>
+                • First 10 patients can book this slot<br>
+                    • 11th patient will see "Fully Booked" and cannot book<br>
+                    • Perfect for managing your workload efficiently!
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
